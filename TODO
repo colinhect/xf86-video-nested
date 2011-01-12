@@ -1,0 +1,22 @@
+TODO
+
+- check if minimum/maximum virtual sizes are set correctly
+- I guess most/all code that deals with mode is somehow wrong
+- define a real policy for the modes we allow the user to use
+- require 1.8 ABI because of HW_SKIP_CONSOLE?
+- add some checking for when the bottom-layer X dies?
+- standardize function definitions (coding style)
+- implement FreeScreen? (http://www.x.org/archive/X11R6.8.2/doc/DESIGN6.html#38)
+- implement the code that validates depths, implement other checks
+- compare Xlib's bpp with pScrn's bpp? is it needed? other similar checks?
+- add some Option "fullscreen"? (for Multiseat)
+- write the xcb backend
+- write other backends (for different window systems, or maybe using portable
+  libraries like SDL or Qt)
+- ability to detach from one xserver and attach to other?
+- be fully xrandr-aware
+- xv?
+- other extensions?
+- improve the code that redraws the screen (damage tracking)
+- fully understand the fb/shadow code to get a clue on what's really going on =)
+- write a man page
