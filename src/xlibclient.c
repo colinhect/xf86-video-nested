@@ -115,7 +115,7 @@ NestedvClientCreateScreen(int    scrnIndex,
 
     XMapWindow(pPriv->display, pPriv->window);
 
-    XSelectInput(pPriv->display, pPriv->window, ExposureMask);
+    XSelectInput(pPriv->display, pPriv->window, ExposureMask | PointerMotionMask);
 
     if (XShmQueryExtension(pPriv->display)) {
 	if (XShmQueryVersion(pPriv->display, &shmMajor, &shmMinor,
@@ -231,6 +231,9 @@ void
 NestedvClientTimerCallback(NestedvClientPrivatePtr pPriv)
 {
     XEvent ev;
+    char *msg = "Cursor";
+    char *msg2 = "Root";
+
     while(XCheckMaskEvent(pPriv->display, ~0, &ev)) {
 	if (ev.type == Expose) {
 	    NestedvClientUpdateScreen(pPriv,
@@ -238,6 +241,10 @@ NestedvClientTimerCallback(NestedvClientPrivatePtr pPriv)
 			((XExposeEvent*)&ev)->y,
 			((XExposeEvent*)&ev)->x + ((XExposeEvent*)&ev)->width,
 			((XExposeEvent*)&ev)->y + ((XExposeEvent*)&ev)->height);
+	}
+	if (ev.type == MotionNotify) {
+	  XDrawString(pPriv->display, pPriv->window, DefaultGC(pPriv->display, pPriv->screenNumber), ((XMotionEvent*)&ev)->x, ((XMotionEvent*)&ev)->y, msg, strlen(msg));
+	  XDrawString(pPriv->display, pPriv->window, DefaultGC(pPriv->display, pPriv->screenNumber), ((XMotionEvent*)&ev)->x_root, ((XMotionEvent*)&ev)->y_root, msg2, strlen(msg2));
 	}
     }
 }
