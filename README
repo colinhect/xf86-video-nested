@@ -1,0 +1,98 @@
+xf86-video-nestedv: driver to run Xorg on top of Xorg or something else
+
+= Usage =
+
+This is how I test it:
+    X -config my.conf -noreset -retro :1
+    (if your Xorg server is old you might need "-sharevts vt7", in case your
+    bottom-layer X runs on vt7)
+
+My xorg.conf:
+
+-- begin xorg.conf --
+Section "ServerFlags"
+    Option "AutoEnableDevices" "false"
+    Option "AutoAddDevices" "false"
+EndSection
+
+Section "Device"
+    Identifier "device1"
+    Driver "nestedv"
+    Option "Display" ":0"     # you can omit this
+EndSection
+
+Section "Screen"
+    Identifier "screen1"
+    Device "device1"
+    DefaultDepth 24
+    Option "Origin" "100 100" # you can omit this
+    SubSection "Display"
+        Depth 24
+        Modes "640x480"
+    EndSubSection
+EndSection
+
+Section "ServerLayout"
+    Identifier "layout1"
+    Screen "screen1"
+EndSection
+-- end xorg.conf --
+
+If you want to have an input device you need 3 things:
+- add another input device to your machine
+- configure your bottom-layer xorg.conf to _not_ use that device (you'll
+  probably have to disable input hotplug and add InputDevice sections in
+  xorg.conf)
+- configure your top-layer xorg.conf to use that device
+In the future I'll write xf86-input-nestedi so you'll be able to use it =)
+
+You can also have more than one screen with this driver. Here's an example of a
+xorg.conf with 2 screens and a mouse:
+
+-- begin xorg.conf --
+Section "ServerFlags"
+    Option "AutoEnableDevices" "false"
+    Option "AutoAddDevices" "false"
+EndSection
+
+Section "Device"
+    Identifier "device1"
+    Driver "nestedv"
+EndSection
+Section "Device"
+    Identifier "device2"
+    Driver "nestedv"
+EndSection
+
+Section "InputDevice"
+    Identifier "mouse1"
+    Driver "evdev"
+    Option "device" "/dev/input/event7"
+EndSection
+
+Section "Screen"
+    Identifier "screen1"
+    Device "device1"
+    DefaultDepth 24
+    SubSection "Display"
+        Depth 24
+        Modes "640x480"
+    EndSubSection
+EndSection
+Section "Screen"
+    Identifier "screen2"
+    Device "device1"
+    DefaultDepth 24
+    SubSection "Display"
+        Depth 24
+        Modes "640x480"
+    EndSubSection
+EndSection
+
+Section "ServerLayout"
+    Identifier "layout1"
+    Screen "screen1"
+    Screen "screen2" RightOf "screen1"
+    InputDevice "mouse1"
+EndSection
+-- end xorg.conf --
