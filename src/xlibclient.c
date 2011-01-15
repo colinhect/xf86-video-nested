@@ -111,7 +111,7 @@ NestedvClientCreateScreen(int    scrnIndex,
     sizeHints.max_height = height;
     XSetWMNormalHints(pPriv->display, pPriv->window, &sizeHints);
 
-    XStoreName(pPriv->display, pPriv->window, "TTCCWN#2");
+    XStoreName(pPriv->display, pPriv->window, "TTCCWN#24");
 
     XMapWindow(pPriv->display, pPriv->window);
 
