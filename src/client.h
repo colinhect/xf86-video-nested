@@ -23,6 +23,7 @@
 
 #include <xorg/colormap.h>
 #include <xorg/misc.h>
+#include "xf86Cursor.h"
 
 struct NestedvClientPrivate;
 typedef struct NestedvClientPrivate *NestedvClientPrivatePtr;
@@ -51,6 +52,9 @@ void NestedvClientUpdateScreen(NestedvClientPrivatePtr pPriv,
 			       int16_t x2,
 			       int16_t y2);
 
+void NestedvClientHideCursor(NestedvClientPrivatePtr pPriv); /* Hide cursor function */
+
 void NestedvClientTimerCallback(NestedvClientPrivatePtr pPriv);
 
 void NestedvClientCloseScreen(NestedvClientPrivatePtr pPriv);
+
