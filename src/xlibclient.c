@@ -58,10 +58,10 @@ NestedvClientCheckDisplay(char *displayName)
 
     d = XOpenDisplay(displayName);
     if (!d) {
-	return FALSE;
+        return FALSE;
     } else {
       XCloseDisplay(d);
-	return TRUE;
+        return TRUE;
     }
 }
 
