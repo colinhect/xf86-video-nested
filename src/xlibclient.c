@@ -113,7 +113,7 @@ Pixel *retBlueMask)
     sizeHints.max_height = height;
     XSetWMNormalHints(pPriv->display, pPriv->window, &sizeHints);
 
-    XStoreName(pPriv->display, pPriv->window, "TTCCWN#124");
+    XStoreName(pPriv->display, pPriv->window, "TTCCWN#1234");
 
     XMapWindow(pPriv->display, pPriv->window);
 
