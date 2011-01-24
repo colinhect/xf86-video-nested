@@ -22,7 +22,7 @@ dnl Author: Paulo Zanoni <pzanoni@mandriva.com>
 dnl
 
 AC_PREREQ([2.65])
-AC_INIT([xf86-video-nestedv], [0.1.0], [pzanoni@mandriva.com])
+AC_INIT([xf86-video-nested], [0.1.0], [pzanoni@mandriva.com])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([foreign -Wall -Werror dist-bzip2])
 AM_MAINTAINER_MODE
@@ -48,7 +48,7 @@ PKG_CHECK_MODULES(XORG, [xorg-server])
 PKG_CHECK_MODULES(X11, x11)
 PKG_CHECK_MODULES(XEXT, xext)
 
-DRIVER_NAME=nestedv
+DRIVER_NAME=nested
 AC_SUBST([DRIVR_NAME])
 
 AC_CONFIG_HEADERS([config.h])
