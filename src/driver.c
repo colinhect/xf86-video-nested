@@ -37,129 +37,132 @@
 
 #include "client.h"
 
-#define NESTEDV_VERSION 0
-#define NESTEDV_NAME "NESTEDV"
-#define NESTEDV_DRIVER_NAME "nestedv"
+#define NESTED_VERSION 0
+#define NESTED_NAME "NESTED"
+#define NESTED_DRIVER_NAME "nested"
 
-#define NESTEDV_MAJOR_VERSION PACKAGE_VERSION_MAJOR
-#define NESTEDV_MINOR_VERSION PACKAGE_VERSION_MINOR
-#define NESTEDV_PATCHLEVEL PACKAGE_VERSION_PATCHLEVEL
+#define NESTED_MAJOR_VERSION PACKAGE_VERSION_MAJOR
+#define NESTED_MINOR_VERSION PACKAGE_VERSION_MINOR
+#define NESTED_PATCHLEVEL PACKAGE_VERSION_PATCHLEVEL
 
 #define TIMER_CALLBACK_INTERVAL 80
 
-static MODULESETUPPROTO(NestedvSetup);
-static void NestedvIdentify(int flags);
-static const OptionInfoRec *NestedvAvailableOptions(int chipid, int busid);
-static Bool NestedvProbe(DriverPtr drv, int flags);
-static Bool NestedvDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op,
-                              pointer ptr);
+static MODULESETUPPROTO(NestedSetup);
+static void NestedIdentify(int flags);
+static const OptionInfoRec *NestedAvailableOptions(int chipid, int busid);
+static Bool NestedProbe(DriverPtr drv, int flags);
+static Bool NestedDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op,
+                             pointer ptr);
 
-static Bool NestedvPreInit(ScrnInfoPtr pScrn, int flags);
-static Bool NestedvScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
-                              char **argv);
-static Bool NestedvSwitchMode(int scrnIndex, DisplayModePtr mode, int flags);
-static void NestedvAdjustFrame(int scrnIndex, int x, int y, int flags);
-static Bool NestedvEnterVT(int scrnIndex, int flags);
-static void NestedvLeaveVT(int scrnIndex, int flags);
-static void NestedvFreeScreen(int scrnIndex, int flags);
-static ModeStatus NestedvValidMode(int scrnIndex, DisplayModePtr mode,
-                                   Bool verbose, int flags);
-static Bool NestedvSaveScreen(ScreenPtr pScreen, int mode);
-static Bool NestedvCreateScreenResources(ScreenPtr pScreen);
-static void NestedvShadowUpdate(ScreenPtr pScreen, shadowBufPtr pBuf);
-static void *NestedvShadowWindow(ScreenPtr pScreen, CARD32 row, CARD32 offset,
-                                 int mode, CARD32 *size, void *closure);
-static Bool NestedvCloseScreen(int scrnIndex, ScreenPtr pScreen);
+static Bool NestedPreInit(ScrnInfoPtr pScrn, int flags);
+static Bool NestedScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
+                             char **argv);
 
-static CARD32 NestedvTimerCallback(OsTimerPtr timer, CARD32 time, pointer arg);
+static Bool NestedSwitchMode(int scrnIndex, DisplayModePtr mode, int flags);
+static void NestedAdjustFrame(int scrnIndex, int x, int y, int flags);
+static Bool NestedEnterVT(int scrnIndex, int flags);
+static void NestedLeaveVT(int scrnIndex, int flags);
+static void NestedFreeScreen(int scrnIndex, int flags);
+static ModeStatus NestedValidMode(int scrnIndex, DisplayModePtr mode,
+                                  Bool verbose, int flags);
 
-int NestedvValidateModes(ScrnInfoPtr pScrn);
-Bool NestedvAddMode(ScrnInfoPtr pScrn, int width, int height);
-void NestedvPrintPscreen(ScrnInfoPtr p);
-void NestedvPrintMode(ScrnInfoPtr p, DisplayModePtr m);
+static Bool NestedSaveScreen(ScreenPtr pScreen, int mode);
+static Bool NestedCreateScreenResources(ScreenPtr pScreen);
+
+static void NestedShadowUpdate(ScreenPtr pScreen, shadowBufPtr pBuf);
+static void *NestedShadowWindow(ScreenPtr pScreen, CARD32 row, CARD32 offset,
+                                int mode, CARD32 *size, void *closure);
+static Bool NestedCloseScreen(int scrnIndex, ScreenPtr pScreen);
+
+static CARD32 NestedTimerCallback(OsTimerPtr timer, CARD32 time, pointer arg);
+
+int NestedValidateModes(ScrnInfoPtr pScrn);
+Bool NestedAddMode(ScrnInfoPtr pScrn, int width, int height);
+void NestedPrintPscreen(ScrnInfoPtr p);
+void NestedPrintMode(ScrnInfoPtr p, DisplayModePtr m);
 
 typedef enum {
     OPTION_DISPLAY,
     OPTION_ORIGIN
-} NestedvOpts;
+} NestedOpts;
 
 typedef enum {
-    NESTEDV_CHIP
-} NestedvType;
+    NESTED_CHIP
+} NestedType;
 
-static SymTabRec NestedvChipsets[] = {
-    { NESTEDV_CHIP, "nestedv" },
+static SymTabRec NestedChipsets[] = {
+    { NESTED_CHIP, "nested" },
     {-1,            NULL }
 };
 
-/* XXX: Shouldn't we allow NestedvClient to define options too? If some day we
- * port NestedvClient to something that's not Xlib/Xcb we might need to add some
+/* XXX: Shouldn't we allow NestedClient to define options too? If some day we
+ * port NestedClient to something that's not Xlib/Xcb we might need to add some
  * custom options */
-static OptionInfoRec NestedvOptions[] = {
+static OptionInfoRec NestedOptions[] = {
     { OPTION_DISPLAY, "Display", OPTV_STRING, {0}, FALSE },
     { OPTION_ORIGIN,  "Origin",  OPTV_STRING, {0}, FALSE },
     { -1,             NULL,      OPTV_NONE,   {0}, FALSE }
 };
 
-_X_EXPORT DriverRec NESTEDV = {
-    NESTEDV_VERSION,
-    NESTEDV_DRIVER_NAME,
-    NestedvIdentify,
-    NestedvProbe,
-    NestedvAvailableOptions,
+_X_EXPORT DriverRec NESTED = {
+    NESTED_VERSION,
+    NESTED_DRIVER_NAME,
+    NestedIdentify,
+    NestedProbe,
+    NestedAvailableOptions,
     NULL, /* module */
     0,    /* refCount */
-    NestedvDriverFunc,
+    NestedDriverFunc,
     NULL, /* DeviceMatch */
     0     /* PciProbe */
 };
 
-static XF86ModuleVersionInfo NestedvVersRec = {
-    NESTEDV_DRIVER_NAME,
+static XF86ModuleVersionInfo NestedVersRec = {
+    NESTED_DRIVER_NAME,
     MODULEVENDORSTRING,
     MODINFOSTRING1,
     MODINFOSTRING2,
     XORG_VERSION_CURRENT,
-    NESTEDV_MAJOR_VERSION,
-    NESTEDV_MINOR_VERSION,
-    NESTEDV_PATCHLEVEL,
+    NESTED_MAJOR_VERSION,
+    NESTED_MINOR_VERSION,
+    NESTED_PATCHLEVEL,
     ABI_CLASS_VIDEODRV,
     ABI_VIDEODRV_VERSION,
     MOD_CLASS_VIDEODRV,
     {0, 0, 0, 0} /* checksum */
 };
 
-_X_EXPORT XF86ModuleData nestedvModuleData = {
-    &NestedvVersRec,
-    NestedvSetup,
+_X_EXPORT XF86ModuleData nestedModuleData = {
+    &NestedVersRec,
+    NestedSetup,
     NULL, /* teardown */
 };
 
 /* These stuff should be valid to all server generations */
-typedef struct NestedvPrivate {
+typedef struct NestedPrivate {
     char                        *displayName;
     int                          originX;
     int                          originY;
-    NestedvClientPrivatePtr      clientData;
+    NestedClientPrivatePtr      clientData;
     CreateScreenResourcesProcPtr CreateScreenResources;
     CloseScreenProcPtr           CloseScreen;
     OsTimerPtr                   timer;
     ShadowUpdateProc             update;
     /*ShadowWindowProc window;*/
-} NestedvPrivate, *NestedvPrivatePtr;
+} NestedPrivate, *NestedPrivatePtr;
 
-#define PNESTEDV(p)    ((NestedvPrivatePtr)((p)->driverPrivate))
-#define PCLIENTDATA(p) (PNESTEDV(p)->clientData)
+#define PNESTED(p)    ((NestedPrivatePtr)((p)->driverPrivate))
+#define PCLIENTDATA(p) (PNESTED(p)->clientData)
 
-/*static ScrnInfoPtr NESTEDVScrn;*/
+/*static ScrnInfoPtr NESTEDScrn;*/
 
 static pointer
-NestedvSetup(pointer module, pointer opts, int *errmaj, int *errmin) {
+NestedSetup(pointer module, pointer opts, int *errmaj, int *errmin) {
     static Bool setupDone = FALSE;
 
     if (!setupDone) {
         setupDone = TRUE;
-        xf86AddDriver(&NESTEDV, module, HaveDriverFuncs);
+        xf86AddDriver(&NESTED, module, HaveDriverFuncs);
         
         return (pointer)1;
     } else {
@@ -171,18 +174,18 @@ NestedvSetup(pointer module, pointer opts, int *errmaj, int *errmin) {
 }
 
 static void
-NestedvIdentify(int flags) {
-    xf86PrintChipsets(NESTEDV_NAME, "Driver for nestedv servers",
-                      NestedvChipsets);
+NestedIdentify(int flags) {
+    xf86PrintChipsets(NESTED_NAME, "Driver for nested servers",
+                      NestedChipsets);
 }
 
 static const OptionInfoRec *
-NestedvAvailableOptions(int chipid, int busid) {
-    return NestedvOptions;
+NestedAvailableOptions(int chipid, int busid) {
+    return NestedOptions;
 }
 
 static Bool
-NestedvProbe(DriverPtr drv, int flags) {
+NestedProbe(DriverPtr drv, int flags) {
     Bool foundScreen = FALSE;
     int numDevSections;
     GDevPtr *devSections;
@@ -194,7 +197,7 @@ NestedvProbe(DriverPtr drv, int flags) {
     if (flags & PROBE_DETECT)
         return FALSE;
 
-    if ((numDevSections = xf86MatchDevice(NESTEDV_DRIVER_NAME,
+    if ((numDevSections = xf86MatchDevice(NESTED_DRIVER_NAME,
                                           &devSections)) <= 0) {
         return FALSE;
     }
@@ -203,23 +206,23 @@ NestedvProbe(DriverPtr drv, int flags) {
     if (numDevSections > 0) {
         for(i = 0; i < numDevSections; i++) {
             pScrn = NULL;
-            entityIndex = xf86ClaimNoSlot(drv, NESTEDV_CHIP, devSections[i],
+            entityIndex = xf86ClaimNoSlot(drv, NESTED_CHIP, devSections[i],
                                           TRUE);
             pScrn = xf86AllocateScreen(drv, 0);
             if (pScrn) {
                 xf86AddEntityToScreen(pScrn, entityIndex);
-                pScrn->driverVersion = NESTEDV_VERSION;
-                pScrn->driverName    = NESTEDV_DRIVER_NAME;
-                pScrn->name          = NESTEDV_NAME;
-                pScrn->Probe         = NestedvProbe;
-                pScrn->PreInit       = NestedvPreInit;
-                pScrn->ScreenInit    = NestedvScreenInit;
-                pScrn->SwitchMode    = NestedvSwitchMode;
-                pScrn->AdjustFrame   = NestedvAdjustFrame;
-                pScrn->EnterVT       = NestedvEnterVT;
-                pScrn->LeaveVT       = NestedvLeaveVT;
-                pScrn->FreeScreen    = NestedvFreeScreen;
-                pScrn->ValidMode     = NestedvValidMode;
+                pScrn->driverVersion = NESTED_VERSION;
+                pScrn->driverName    = NESTED_DRIVER_NAME;
+                pScrn->name          = NESTED_NAME;
+                pScrn->Probe         = NestedProbe;
+                pScrn->PreInit       = NestedPreInit;
+                pScrn->ScreenInit    = NestedScreenInit;
+                pScrn->SwitchMode    = NestedSwitchMode;
+                pScrn->AdjustFrame   = NestedAdjustFrame;
+                pScrn->EnterVT       = NestedEnterVT;
+                pScrn->LeaveVT       = NestedLeaveVT;
+                pScrn->FreeScreen    = NestedFreeScreen;
+                pScrn->ValidMode     = NestedValidMode;
                 foundScreen = TRUE;
             }
         }
@@ -233,9 +236,9 @@ NestedvProbe(DriverPtr drv, int flags) {
 #endif
 
 static Bool
-NestedvDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer ptr) {
+NestedDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer ptr) {
     CARD32 *flag;
-    xf86Msg(X_INFO, "NestedvDriverFunc\n");
+    xf86Msg(X_INFO, "NestedDriverFunc\n");
 
     /* XXX implement */
     switch(op) {
@@ -252,23 +255,23 @@ NestedvDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer ptr) {
     }
 }
 
-static Bool NestedvAllocatePrivate(ScrnInfoPtr pScrn) {
+static Bool NestedAllocatePrivate(ScrnInfoPtr pScrn) {
     if (pScrn->driverPrivate != NULL) {
-        xf86Msg(X_WARNING, "NestedvAllocatePrivate called for an already "
+        xf86Msg(X_WARNING, "NestedAllocatePrivate called for an already "
                 "allocated private!\n");
         return FALSE;
     }
 
-    pScrn->driverPrivate = xnfcalloc(sizeof(NestedvPrivate), 1);
+    pScrn->driverPrivate = xnfcalloc(sizeof(NestedPrivate), 1);
     if (pScrn->driverPrivate == NULL)
         return FALSE;
     return TRUE;
 }
 
-static void NestedvFreePrivate(ScrnInfoPtr pScrn) {
+static void NestedFreePrivate(ScrnInfoPtr pScrn) {
     if (pScrn->driverPrivate == NULL) {
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                   "Double freeing NestedvPrivate!\n");
+                   "Double freeing NestedPrivate!\n");
         return;
     }
 
@@ -277,23 +280,25 @@ static void NestedvFreePrivate(ScrnInfoPtr pScrn) {
 }
 
 /* Data from here is valid to all server generations */
-static Bool NestedvPreInit(ScrnInfoPtr pScrn, int flags) {
-    NestedvPrivatePtr pNestedv;
+static Bool NestedPreInit(ScrnInfoPtr pScrn, int flags) {
+    NestedPrivatePtr pNested;
     char *originString = NULL;
 
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "NestedvPreInit\n");
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "NestedPreInit\n");
 
     if (flags & PROBE_DETECT)
         return FALSE;
 
-    if (!NestedvAllocatePrivate(pScrn)) {
+    if (!NestedAllocatePrivate(pScrn)) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Failed to allocate private\n");
         return FALSE;
     }
-    pNestedv = PNESTEDV(pScrn);
+
+    pNested = PNESTED(pScrn);
 
     if (!xf86SetDepthBpp(pScrn, 0, 0, 0, Support24bppFb | Support32bppFb))
         return FALSE;
+ 
     xf86PrintDepthBpp(pScrn);
 
     if (pScrn->depth > 8) {
@@ -309,41 +314,41 @@ static Bool NestedvPreInit(ScrnInfoPtr pScrn, int flags) {
     pScrn->monitor = pScrn->confScreen->monitor; /* XXX */
 
     xf86CollectOptions(pScrn, NULL);
-    xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, NestedvOptions);
+    xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, NestedOptions);
 
-    if (xf86IsOptionSet(NestedvOptions, OPTION_DISPLAY)) {
-        pNestedv->displayName = xf86GetOptValString(NestedvOptions,
-                                                    OPTION_DISPLAY);
+    if (xf86IsOptionSet(NestedOptions, OPTION_DISPLAY)) {
+        pNested->displayName = xf86GetOptValString(NestedOptions,
+                                                   OPTION_DISPLAY);
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Using display \"%s\"\n",
-                   pNestedv->displayName);
+                   pNested->displayName);
     } else {
-        pNestedv->displayName = NULL;
+        pNested->displayName = NULL;
     }
 
-    if (xf86IsOptionSet(NestedvOptions, OPTION_ORIGIN)) {
-        originString = xf86GetOptValString(NestedvOptions, OPTION_ORIGIN);
-        if (sscanf(originString, "%d %d", &pNestedv->originX,
-            &pNestedv->originY) != 2) {
+    if (xf86IsOptionSet(NestedOptions, OPTION_ORIGIN)) {
+        originString = xf86GetOptValString(NestedOptions, OPTION_ORIGIN);
+        if (sscanf(originString, "%d %d", &pNested->originX,
+            &pNested->originY) != 2) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                        "Invalid value for option \"Origin\"\n");
             return FALSE;
         }
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Using origin x:%d y:%d\n",
-                   pNestedv->originX, pNestedv->originY);
+                   pNested->originX, pNested->originY);
     } else {
-        pNestedv->originX = 0;
-        pNestedv->originY = 0;
+        pNested->originX = 0;
+        pNested->originY = 0;
     }
 
     xf86ShowUnusedOptions(pScrn->scrnIndex, pScrn->options);
 
-    if (!NestedvClientCheckDisplay(pNestedv->displayName)) {
+    if (!NestedClientCheckDisplay(pNested->displayName)) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Can't open display: %s\n",
-                   pNestedv->displayName);
+                   pNested->displayName);
         return FALSE;
     }
 
-    if (!NestedvClientValidDepth(pScrn->depth)) {
+    if (!NestedClientValidDepth(pScrn->depth)) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Invalid depth: %d\n",
                    pScrn->depth);
         return FALSE;
@@ -355,7 +360,7 @@ static Bool NestedvPreInit(ScrnInfoPtr pScrn, int flags) {
             return FALSE;
     }*/
 
-    if (NestedvValidateModes(pScrn) < 1) {
+    if (NestedValidateModes(pScrn) < 1) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No valid modes\n");
         return FALSE;
     }
@@ -385,7 +390,7 @@ static Bool NestedvPreInit(ScrnInfoPtr pScrn, int flags) {
 }
 
 int
-NestedvValidateModes(ScrnInfoPtr pScrn) {
+NestedValidateModes(ScrnInfoPtr pScrn) {
     DisplayModePtr mode;
     int i, width, height, ret = 0;
     int maxX = 0, maxY = 0;
@@ -410,12 +415,12 @@ NestedvValidateModes(ScrnInfoPtr pScrn) {
                            "This is not the mode name I was expecting...\n");
                 return 0;
             }
-            if (!NestedvAddMode(pScrn, width, height)) {
+            if (!NestedAddMode(pScrn, width, height)) {
                 return 0;
             }
         }
     } else {
-        if (!NestedvAddMode(pScrn, 640, 480)) {
+        if (!NestedAddMode(pScrn, 640, 480)) {
             return 0;
         }
     }
@@ -435,8 +440,10 @@ NestedvValidateModes(ScrnInfoPtr pScrn) {
         while (mode != NULL) {
             if (mode->HDisplay > maxX)
                 maxX = mode->HDisplay;
+       
             if (mode->VDisplay > maxY)
                 maxY = mode->VDisplay;
+          
             mode = mode->next;
         }
         pScrn->virtualX = maxX;
@@ -498,7 +505,7 @@ NestedvValidateModes(ScrnInfoPtr pScrn) {
          (mode != pScrn->modes) && (rounds == 1);
          mode = mode->next) {
         rounds = 1;
-        NestedvValidMode(pScrn->scrnIndex, mode, FALSE, 0);
+        NestedValidMode(pScrn->scrnIndex, mode, FALSE, 0);
 
     }
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "pScrn->virtualX: %d\n",
@@ -519,7 +526,7 @@ NestedvValidateModes(ScrnInfoPtr pScrn) {
 }
 
 Bool
-NestedvAddMode(ScrnInfoPtr pScrn, int width, int height) {
+NestedAddMode(ScrnInfoPtr pScrn, int width, int height) {
     DisplayModePtr mode;
     char nameBuf[64];
     int rc;
@@ -556,33 +563,33 @@ NestedvAddMode(ScrnInfoPtr pScrn, int width, int height) {
 }
 
 /* Called at each server generation */
-static Bool NestedvScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
-                              char **argv) {
+static Bool NestedScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
+                             char **argv) {
     ScrnInfoPtr pScrn;
-    NestedvPrivatePtr pNestedv;
+    NestedPrivatePtr pNested;
     Pixel redMask, greenMask, blueMask;
 
-    xf86DrvMsg(scrnIndex, X_INFO, "NestedvScreenInit\n");
+    xf86DrvMsg(scrnIndex, X_INFO, "NestedScreenInit\n");
 
     pScrn = xf86Screens[pScreen->myNum];
-    pNestedv = PNESTEDV(pScrn);
-    /*NESTEDVScrn = pScrn;*/
+    pNested = PNESTED(pScrn);
+    /*NESTEDScrn = pScrn;*/
 
-    NestedvPrintPscreen(pScrn);
+    NestedPrintPscreen(pScrn);
 
     /* Save state:
-     * NestedvSave(pScrn); */
+     * NestedSave(pScrn); */
 
-    pNestedv->clientData = NestedvClientCreateScreen(scrnIndex,
-                                            pNestedv->displayName,
-                                            pScrn->virtualX,
-                                            pScrn->virtualY,
-                                            pNestedv->originX,
-                                            pNestedv->originY,
-                                            pScrn->depth,
-                                            pScrn->bitsPerPixel,
-                                            &redMask, &greenMask, &blueMask);
-    if (!pNestedv->clientData) {
+    pNested->clientData = NestedClientCreateScreen(scrnIndex,
+                                                   pNested->displayName,
+                                                   pScrn->virtualX,
+                                                   pScrn->virtualY,
+                                                   pNested->originX,
+                                                   pNested->originY,
+                                                   pScrn->depth,
+                                                   pScrn->bitsPerPixel,
+                                                   &redMask, &greenMask, &blueMask);
+    if (!pNested->clientData) {
         xf86DrvMsg(scrnIndex, X_ERROR, "Failed to create client screen\n");
         return FALSE;
     }
@@ -593,10 +600,11 @@ static Bool NestedvScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
                                   pScrn->rgbBits, pScrn->defaultVisual,
                                   redMask, greenMask, blueMask))
         return FALSE;
+    
     if (!miSetPixmapDepths())
         return FALSE;
 
-    if (!fbScreenInit(pScreen, NestedvClientGetFrameBuffer(PCLIENTDATA(pScrn)),
+    if (!fbScreenInit(pScreen, NestedClientGetFrameBuffer(PCLIENTDATA(pScrn)),
                       pScrn->virtualX, pScrn->virtualY, pScrn->xDpi,
                       pScrn->yDpi, pScrn->displayWidth, pScrn->bitsPerPixel))
         return FALSE;
@@ -607,105 +615,106 @@ static Bool NestedvScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
     miInitializeBackingStore(pScreen);
     xf86SetBackingStore(pScreen);
     miDCInitialize(pScreen, xf86GetPointerScreenFuncs());
+    
     if (!miCreateDefColormap(pScreen))
         return FALSE;
 
-    pNestedv->update = NestedvShadowUpdate;
-    /*pNestedv->window = NestedvShadowWindow;*/
-    pScreen->SaveScreen = NestedvSaveScreen;
+    pNested->update = NestedShadowUpdate;
+    /*pNested->window = NestedShadowWindow;*/
+    pScreen->SaveScreen = NestedSaveScreen;
 
     if (!shadowSetup(pScreen))
         return FALSE;
 
-    pNestedv->CreateScreenResources = pScreen->CreateScreenResources;
-    pScreen->CreateScreenResources = NestedvCreateScreenResources;
+    pNested->CreateScreenResources = pScreen->CreateScreenResources;
+    pScreen->CreateScreenResources = NestedCreateScreenResources;
 
-    pNestedv->CloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = NestedvCloseScreen;
+    pNested->CloseScreen = pScreen->CloseScreen;
+    pScreen->CloseScreen = NestedCloseScreen;
 
-    pNestedv->timer = TimerSet(NULL, 0, TIMER_CALLBACK_INTERVAL,
-                               NestedvTimerCallback, (pointer)pScrn);
+    pNested->timer = TimerSet(NULL, 0, TIMER_CALLBACK_INTERVAL,
+                              NestedTimerCallback, (pointer)pScrn);
 
     return TRUE;
 
 }
 
 static Bool
-NestedvCreateScreenResources(ScreenPtr pScreen) {
-    xf86DrvMsg(pScreen->myNum, X_INFO, "NestedvCreateScreenResources\n");
+NestedCreateScreenResources(ScreenPtr pScreen) {
+    xf86DrvMsg(pScreen->myNum, X_INFO, "NestedCreateScreenResources\n");
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
-    NestedvPrivatePtr pNestedv = PNESTEDV(pScrn);
+    NestedPrivatePtr pNested = PNESTED(pScrn);
     Bool ret;
 
-    pScreen->CreateScreenResources = pNestedv->CreateScreenResources;
+    pScreen->CreateScreenResources = pNested->CreateScreenResources;
     ret = pScreen->CreateScreenResources(pScreen);
-    pScreen->CreateScreenResources = NestedvCreateScreenResources;
+    pScreen->CreateScreenResources = NestedCreateScreenResources;
 
-    shadowAdd(pScreen, pScreen->GetScreenPixmap(pScreen), pNestedv->update,
-              /*pNestedv->window*/ 0, 0, 0);
+    shadowAdd(pScreen, pScreen->GetScreenPixmap(pScreen), pNested->update,
+              /*pNested->window*/ 0, 0, 0);
 }
 
 static void
-NestedvShadowUpdate(ScreenPtr pScreen, shadowBufPtr pBuf) {
+NestedShadowUpdate(ScreenPtr pScreen, shadowBufPtr pBuf) {
     RegionPtr pRegion = DamageRegion(pBuf->pDamage);
-    NestedvClientUpdateScreen(PCLIENTDATA(xf86Screens[pScreen->myNum]),
-                              pRegion->extents.x1, pRegion->extents.y1,
-                              pRegion->extents.x2, pRegion->extents.y2);
+    NestedClientUpdateScreen(PCLIENTDATA(xf86Screens[pScreen->myNum]),
+                             pRegion->extents.x1, pRegion->extents.y1,
+                             pRegion->extents.x2, pRegion->extents.y2);
 }
 
 static Bool
-NestedvCloseScreen(int scrnIndex, ScreenPtr pScreen) {
+NestedCloseScreen(int scrnIndex, ScreenPtr pScreen) {
     ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
 
-    xf86DrvMsg(scrnIndex, X_INFO, "NestedvCloseScreen\n");
+    xf86DrvMsg(scrnIndex, X_INFO, "NestedCloseScreen\n");
 
     shadowRemove(pScreen, pScreen->GetScreenPixmap(pScreen));
 
-    TimerFree(PNESTEDV(pScrn)->timer);
-    NestedvClientCloseScreen(PCLIENTDATA(pScrn));
+    TimerFree(PNESTED(pScrn)->timer);
+    NestedClientCloseScreen(PCLIENTDATA(pScrn));
 
-    pScreen->CloseScreen = PNESTEDV(pScrn)->CloseScreen;
+    pScreen->CloseScreen = PNESTED(pScrn)->CloseScreen;
     return (*pScreen->CloseScreen)(scrnIndex, pScreen);
 }
 
-static CARD32 NestedvTimerCallback(OsTimerPtr timer, CARD32 time, pointer arg) {
+static CARD32 NestedTimerCallback(OsTimerPtr timer, CARD32 time, pointer arg) {
     ScrnInfoPtr pScrn = (ScrnInfoPtr) arg;
-    NestedvClientTimerCallback(PCLIENTDATA(pScrn));
+    NestedClientTimerCallback(PCLIENTDATA(pScrn));
     return TIMER_CALLBACK_INTERVAL;
 }
 
-static void *NestedvShadowWindow(ScreenPtr pScreen, CARD32 row, CARD32 offset,
-                                 int mode, CARD32 *size, void *closure) {
-    xf86DrvMsg(pScreen->myNum, X_INFO, "NestedvShadowWindow\n");
+static void *NestedShadowWindow(ScreenPtr pScreen, CARD32 row, CARD32 offset,
+                                int mode, CARD32 *size, void *closure) {
+    xf86DrvMsg(pScreen->myNum, X_INFO, "NestedShadowWindow\n");
 }
 
-static Bool NestedvSaveScreen(ScreenPtr pScreen, int mode) {
-    xf86DrvMsg(pScreen->myNum, X_INFO, "NestedvSaveScreen\n");
+static Bool NestedSaveScreen(ScreenPtr pScreen, int mode) {
+    xf86DrvMsg(pScreen->myNum, X_INFO, "NestedSaveScreen\n");
 }
 
-static Bool NestedvSwitchMode(int scrnIndex, DisplayModePtr mode, int flags) {
-    xf86DrvMsg(scrnIndex, X_INFO, "NestedvSwitchMode\n");
+static Bool NestedSwitchMode(int scrnIndex, DisplayModePtr mode, int flags) {
+    xf86DrvMsg(scrnIndex, X_INFO, "NestedSwitchMode\n");
 }
 
-static void NestedvAdjustFrame(int scrnIndex, int x, int y, int flags) {
-    xf86DrvMsg(scrnIndex, X_INFO, "NestedvAdjustFrame\n");
+static void NestedAdjustFrame(int scrnIndex, int x, int y, int flags) {
+    xf86DrvMsg(scrnIndex, X_INFO, "NestedAdjustFrame\n");
 }
 
-static Bool NestedvEnterVT(int scrnIndex, int flags) {
-    xf86DrvMsg(scrnIndex, X_INFO, "NestedvEnterVT\n");
+static Bool NestedEnterVT(int scrnIndex, int flags) {
+    xf86DrvMsg(scrnIndex, X_INFO, "NestedEnterVT\n");
 }
 
-static void NestedvLeaveVT(int scrnIndex, int flags) {
-    xf86DrvMsg(scrnIndex, X_INFO, "NestedvLeaveVT\n");
+static void NestedLeaveVT(int scrnIndex, int flags) {
+    xf86DrvMsg(scrnIndex, X_INFO, "NestedLeaveVT\n");
 }
 
-static void NestedvFreeScreen(int scrnIndex, int flags) {
-    xf86DrvMsg(scrnIndex, X_INFO, "NestedvFreeScreen\n");
+static void NestedFreeScreen(int scrnIndex, int flags) {
+    xf86DrvMsg(scrnIndex, X_INFO, "NestedFreeScreen\n");
 }
 
-static ModeStatus NestedvValidMode(int scrnIndex, DisplayModePtr mode,
+static ModeStatus NestedValidMode(int scrnIndex, DisplayModePtr mode,
                                   Bool verbose, int flags) {
-    xf86DrvMsg(scrnIndex, X_INFO, "NestedvValidMode:\n");
+    xf86DrvMsg(scrnIndex, X_INFO, "NestedValidMode:\n");
 
     if (!mode)
         xf86DrvMsg(scrnIndex, X_ERROR, "NULL MODE!\n");
@@ -716,7 +725,7 @@ static ModeStatus NestedvValidMode(int scrnIndex, DisplayModePtr mode,
     return MODE_OK;
 }
 
-void NestedvPrintPscreen(ScrnInfoPtr p) {
+void NestedPrintPscreen(ScrnInfoPtr p) {
     /* XXX: finish implementing this someday? */
     xf86DrvMsg(p->scrnIndex, X_INFO, "Printing pScrn:\n");
     xf86DrvMsg(p->scrnIndex, X_INFO, "driverVersion: %d\n", p->driverVersion);
@@ -735,12 +744,12 @@ void NestedvPrintPscreen(ScrnInfoPtr p) {
     xf86DrvMsg(p->scrnIndex, X_INFO, "bitsPerPixel: %d\n", p->bitsPerPixel);
     /*xf86DrvMsg(p->scrnIndex, X_INFO, "pixmap24: 0x%x\n"); */
     xf86DrvMsg(p->scrnIndex, X_INFO, "depth: %d\n", p->depth);
-    NestedvPrintMode(p, p->currentMode);
+    NestedPrintMode(p, p->currentMode);
     /*xf86DrvMsg(p->scrnIndex, X_INFO, "depthFrom: %\n");
     xf86DrvMsg(p->scrnIndex, X_INFO, "\n");*/
 }
 
-void NestedvPrintMode(ScrnInfoPtr p, DisplayModePtr m) {
+void NestedPrintMode(ScrnInfoPtr p, DisplayModePtr m) {
     xf86DrvMsg(p->scrnIndex, X_INFO, "HDisplay   %d\n",   m->HDisplay);
     xf86DrvMsg(p->scrnIndex, X_INFO, "HSyncStart %d\n", m->HSyncStart);
     xf86DrvMsg(p->scrnIndex, X_INFO, "HSyncEnd   %d\n",   m->HSyncEnd);

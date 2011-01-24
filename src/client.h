@@ -25,36 +25,36 @@
 #include <xorg/misc.h>
 #include "xf86Cursor.h"
 
-struct NestedvClientPrivate;
-typedef struct NestedvClientPrivate *NestedvClientPrivatePtr;
+struct NestedClientPrivate;
+typedef struct NestedClientPrivate *NestedClientPrivatePtr;
 
-Bool NestedvClientCheckDisplay(char *displayName);
+Bool NestedClientCheckDisplay(char *displayName);
 
-Bool NestedvClientValidDepth(int depth);
+Bool NestedClientValidDepth(int depth);
 
-NestedvClientPrivatePtr NestedvClientCreateScreen(int    scrnIndex,
-                                                  char  *displayName,
-                                                  int    width,
-                                                  int    height,
-                                                  int    originX,
-                                                  int    originY,
-                                                  int    depth,
-                                                  int    bitsPerPixel,
-                                                  Pixel *retRedMask,
-                                                  Pixel *retGreenMask,
-                                                  Pixel *retBlueMask);
+NestedClientPrivatePtr NestedClientCreateScreen(int    scrnIndex,
+                                                char  *displayName,
+                                                int    width,
+                                                int    height,
+                                                int    originX,
+                                                int    originY,
+                                                int    depth,
+                                                int    bitsPerPixel,
+                                                Pixel *retRedMask,
+                                                Pixel *retGreenMask,
+                                                Pixel *retBlueMask);
 
-char *NestedvClientGetFrameBuffer(NestedvClientPrivatePtr pPriv);
+char *NestedClientGetFrameBuffer(NestedClientPrivatePtr pPriv);
 
-void NestedvClientUpdateScreen(NestedvClientPrivatePtr pPriv,
-                               int16_t x1,
-                               int16_t y1,
-                               int16_t x2,
-                               int16_t y2);
+void NestedClientUpdateScreen(NestedClientPrivatePtr pPriv,
+                              int16_t x1,
+                              int16_t y1,
+                              int16_t x2,
+                              int16_t y2);
 
-void NestedvClientHideCursor(NestedvClientPrivatePtr pPriv); /* Hide cursor function */
+void NestedClientHideCursor(NestedClientPrivatePtr pPriv); /* Hide cursor function */
 
-void NestedvClientTimerCallback(NestedvClientPrivatePtr pPriv);
+void NestedClientTimerCallback(NestedClientPrivatePtr pPriv);
 
-void NestedvClientCloseScreen(NestedvClientPrivatePtr pPriv);
+void NestedClientCloseScreen(NestedClientPrivatePtr pPriv);
 

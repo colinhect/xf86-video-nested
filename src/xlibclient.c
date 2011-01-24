@@ -34,7 +34,7 @@
 
 #include "client.h"
 
-struct NestedvClientPrivate {
+struct NestedClientPrivate {
     Display *display;
     int screenNumber;
     Screen *screen;
@@ -52,7 +52,7 @@ struct NestedvClientPrivate {
 
 /* Checks if a display is open */
 Bool
-NestedvClientCheckDisplay(char *displayName) {
+NestedClientCheckDisplay(char *displayName) {
     Display *d;
 
     d = XOpenDisplay(displayName);
@@ -65,30 +65,30 @@ NestedvClientCheckDisplay(char *displayName) {
 }
 
 Bool
-NestedvClientValidDepth(int depth) {
+NestedClientValidDepth(int depth) {
     /* XXX: implement! */
     return TRUE;
 }
 
-NestedvClientPrivatePtr
-NestedvClientCreateScreen(int scrnIndex,
-                          char *displayName,
-                          int width,
-                          int height,
-                          int originX,
-                          int originY,
-                          int depth,
-                          int bitsPerPixel,
-                          Pixel *retRedMask,
-                          Pixel *retGreenMask,
-                          Pixel *retBlueMask) {
-    NestedvClientPrivatePtr pPriv;
+NestedClientPrivatePtr
+NestedClientCreateScreen(int scrnIndex,
+                         char *displayName,
+                         int width,
+                         int height,
+                         int originX,
+                         int originY,
+                         int depth,
+                         int bitsPerPixel,
+                         Pixel *retRedMask,
+                         Pixel *retGreenMask,
+                         Pixel *retBlueMask) {
+    NestedClientPrivatePtr pPriv;
     XSizeHints sizeHints;
 
     int shmMajor, shmMinor;
     Bool hasSharedPixmaps;
 
-    pPriv = malloc(sizeof(struct NestedvClientPrivate));
+    pPriv = malloc(sizeof(struct NestedClientPrivate));
     pPriv->scrnIndex = scrnIndex;
 
     pPriv->display = XOpenDisplay(displayName);
@@ -115,42 +115,41 @@ NestedvClientCreateScreen(int scrnIndex,
     XMapWindow(pPriv->display, pPriv->window);
 
     XSelectInput(pPriv->display, pPriv->window, ExposureMask | 
-            PointerMotionMask);
+                 PointerMotionMask);
 
     if (XShmQueryExtension(pPriv->display)) {
         if (XShmQueryVersion(pPriv->display, &shmMajor, &shmMinor,
-        &hasSharedPixmaps)) {
+                             &hasSharedPixmaps)) {
             xf86DrvMsg(scrnIndex, X_INFO,
-            "XShm extension version %d.%d %s shared pixmaps\n",
-            shmMajor, shmMinor,
-            (hasSharedPixmaps) ? "with" : "without");
+                       "XShm extension version %d.%d %s shared pixmaps\n",
+                       shmMajor, shmMinor,
+                       (hasSharedPixmaps) ? "with" : "without");
         }
 
         pPriv->img = XShmCreateImage(pPriv->display,
-                DefaultVisualOfScreen(pPriv->screen),
-                depth,
-                ZPixmap,
-                NULL, /* data */
-                &pPriv->shminfo,
-                width,
-                height);
+                                     DefaultVisualOfScreen(pPriv->screen),
+                                     depth,
+                                     ZPixmap,
+                                     NULL, /* data */
+                                     &pPriv->shminfo,
+                                     width,
+                                     height);
 
         if (!pPriv->img)
             return NULL;
 
         /* XXX: change the 0777 mask? */
         pPriv->shminfo.shmid = shmget(IPC_PRIVATE,
-                pPriv->img->bytes_per_line *
-                pPriv->img->height,
-                IPC_CREAT | 0777);
+                                      pPriv->img->bytes_per_line *
+                                      pPriv->img->height,
+                                      IPC_CREAT | 0777);
 
         if (pPriv->shminfo.shmid == -1) {
             XDestroyImage(pPriv->img);
             return NULL;
         }
 
-        pPriv->shminfo.shmaddr = (char *)shmat(pPriv->shminfo.shmid, NULL,
-                0);
+        pPriv->shminfo.shmaddr = (char *)shmat(pPriv->shminfo.shmid, NULL, 0);
 
         if (pPriv->shminfo.shmaddr == (char *) -1) {
             XDestroyImage(pPriv->img);
@@ -166,26 +165,26 @@ NestedvClientCreateScreen(int scrnIndex,
         xf86DrvMsg(scrnIndex, X_INFO, "XShm not supported\n");
         pPriv->img = XCreateImage(pPriv->display,
         DefaultVisualOfScreen(pPriv->screen),
-                depth,
-                ZPixmap,
-                0, /* offset */
-                NULL, /* data */
-                width,
-                height,
-                32, /* XXX: bitmap_pad */
-                0 /* XXX: bytes_per_line */);
+                              depth,
+                              ZPixmap,
+                              0, /* offset */
+                              NULL, /* data */
+                              width,
+                              height,
+                              32, /* XXX: bitmap_pad */
+                              0 /* XXX: bytes_per_line */);
 
         if (!pPriv->img)
             return NULL;
 
-        pPriv->img->data = malloc(pPriv->img->bytes_per_line *
-                pPriv->img->height);
+        pPriv->img->data = malloc(pPriv->img->bytes_per_line * pPriv->img->height);
         pPriv->usingShm = FALSE;
     }
+
     if (!pPriv->img->data)
         return NULL;
 
-    NestedvClientHideCursor(pPriv); /* Hide cursor */
+    NestedClientHideCursor(pPriv); /* Hide cursor */
 
 #if 0
 xf86DrvMsg(scrnIndex, X_INFO, "width: %d\n", pPriv->img->width);
@@ -213,7 +212,7 @@ xf86DrvMsg(scrnIndex, X_INFO, "blu_mask: 0x%lx\n", pPriv->img->blue_mask);
     return pPriv;
 }
 
-void NestedvClientHideCursor(NestedvClientPrivatePtr pPriv) {
+void NestedClientHideCursor(NestedClientPrivatePtr pPriv) {
     char noData[]= {0,0,0,0,0,0,0,0};
     pPriv->color1.red = pPriv->color1.green = pPriv->color1.blue = 0;
 
@@ -229,54 +228,55 @@ void NestedvClientHideCursor(NestedvClientPrivatePtr pPriv) {
 }
 
 char *
-NestedvClientGetFrameBuffer(NestedvClientPrivatePtr pPriv) {
+NestedClientGetFrameBuffer(NestedClientPrivatePtr pPriv) {
     return pPriv->img->data;
 }
 
 void
-NestedvClientUpdateScreen(NestedvClientPrivatePtr pPriv, int16_t x1,
+NestedClientUpdateScreen(NestedClientPrivatePtr pPriv, int16_t x1,
                           int16_t y1, int16_t x2, int16_t y2) {
     if (pPriv->usingShm) {
         XShmPutImage(pPriv->display, pPriv->window, pPriv->gc, pPriv->img,
-                x1, y1, x1, y1, x2 - x1, y2 - y1, FALSE);
+                     x1, y1, x1, y1, x2 - x1, y2 - y1, FALSE);
         /* Without this sync we get some freezes, probably due to some lock
          * in the shm usage */
         XSync(pPriv->display, FALSE);
     } else {
         XPutImage(pPriv->display, pPriv->window, pPriv->gc, pPriv->img,
-                x1, y1, x1, y1, x2 - x1, y2 - y1);
+                  x1, y1, x1, y1, x2 - x1, y2 - y1);
     }
 }
 
 void
-NestedvClientTimerCallback(NestedvClientPrivatePtr pPriv) {
+NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
     XEvent ev;
     char *msg = "Cursor";
     char *msg2 = "Root";
 
     while(XCheckMaskEvent(pPriv->display, ~0, &ev)) {
         if (ev.type == Expose) {
-            NestedvClientUpdateScreen(pPriv,
-                    ((XExposeEvent*)&ev)->x,
-                    ((XExposeEvent*)&ev)->y,
-                    ((XExposeEvent*)&ev)->x + ((XExposeEvent*)&ev)->width,
-                    ((XExposeEvent*)&ev)->y + ((XExposeEvent*)&ev)->height);
+            NestedClientUpdateScreen(pPriv,
+                                     ((XExposeEvent*)&ev)->x,
+                                     ((XExposeEvent*)&ev)->y,
+                                     ((XExposeEvent*)&ev)->x + ((XExposeEvent*)&ev)->width,
+                                     ((XExposeEvent*)&ev)->y + ((XExposeEvent*)&ev)->height);
         }
+
         if (ev.type == MotionNotify) {
             XDrawString(pPriv->display, pPriv->window,
-                    DefaultGC(pPriv->display, pPriv->screenNumber),
-                    ((XMotionEvent*)&ev)->x, ((XMotionEvent*)&ev)->y, msg,
-                    strlen(msg));
+                        DefaultGC(pPriv->display, pPriv->screenNumber),
+                        ((XMotionEvent*)&ev)->x, ((XMotionEvent*)&ev)->y, msg,
+                        strlen(msg));
             XDrawString(pPriv->display, pPriv->window,
-                    DefaultGC(pPriv->display, pPriv->screenNumber),
-                    ((XMotionEvent*)&ev)->x_root,
-                    ((XMotionEvent*)&ev)->y_root, msg2, strlen(msg2));
+                        DefaultGC(pPriv->display, pPriv->screenNumber),
+                        ((XMotionEvent*)&ev)->x_root,
+                        ((XMotionEvent*)&ev)->y_root, msg2, strlen(msg2));
         }
     }
 }
 
 void
-NestedvClientCloseScreen(NestedvClientPrivatePtr pPriv) {
+NestedClientCloseScreen(NestedClientPrivatePtr pPriv) {
     if (pPriv->usingShm) {
         XShmDetach(pPriv->display, &pPriv->shminfo);
         shmdt(pPriv->shminfo.shmaddr);
