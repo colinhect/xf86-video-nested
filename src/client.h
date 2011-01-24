@@ -33,24 +33,24 @@ Bool NestedvClientCheckDisplay(char *displayName);
 Bool NestedvClientValidDepth(int depth);
 
 NestedvClientPrivatePtr NestedvClientCreateScreen(int    scrnIndex,
-						  char  *displayName,
-						  int    width,
-						  int    height,
-						  int    originX,
-						  int    originY,
-						  int    depth,
-						  int    bitsPerPixel,
-						  Pixel *retRedMask,
-						  Pixel *retGreenMask,
-						  Pixel *retBlueMask);
+                                                  char  *displayName,
+                                                  int    width,
+                                                  int    height,
+                                                  int    originX,
+                                                  int    originY,
+                                                  int    depth,
+                                                  int    bitsPerPixel,
+                                                  Pixel *retRedMask,
+                                                  Pixel *retGreenMask,
+                                                  Pixel *retBlueMask);
 
 char *NestedvClientGetFrameBuffer(NestedvClientPrivatePtr pPriv);
 
 void NestedvClientUpdateScreen(NestedvClientPrivatePtr pPriv,
-			       int16_t x1,
-			       int16_t y1,
-			       int16_t x2,
-			       int16_t y2);
+                               int16_t x1,
+                               int16_t y1,
+                               int16_t x2,
+                               int16_t y2);
 
 void NestedvClientHideCursor(NestedvClientPrivatePtr pPriv); /* Hide cursor function */
 

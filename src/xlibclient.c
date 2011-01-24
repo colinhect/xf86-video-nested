@@ -52,8 +52,7 @@ struct NestedvClientPrivate {
 
 /* Checks if a display is open */
 Bool
-NestedvClientCheckDisplay(char *displayName)
-{
+NestedvClientCheckDisplay(char *displayName) {
     Display *d;
 
     d = XOpenDisplay(displayName);
@@ -66,25 +65,23 @@ NestedvClientCheckDisplay(char *displayName)
 }
 
 Bool
-NestedvClientValidDepth(int depth)
-{
+NestedvClientValidDepth(int depth) {
     /* XXX: implement! */
     return TRUE;
 }
 
 NestedvClientPrivatePtr
 NestedvClientCreateScreen(int scrnIndex,
-char *displayName,
-int width,
-int height,
-int originX,
-int originY,
-int depth,
-int bitsPerPixel,
-Pixel *retRedMask,
-Pixel *retGreenMask,
-Pixel *retBlueMask)
-{
+                          char *displayName,
+                          int width,
+                          int height,
+                          int originX,
+                          int originY,
+                          int depth,
+                          int bitsPerPixel,
+                          Pixel *retRedMask,
+                          Pixel *retGreenMask,
+                          Pixel *retBlueMask) {
     NestedvClientPrivatePtr pPriv;
     XSizeHints sizeHints;
 
@@ -216,29 +213,29 @@ xf86DrvMsg(scrnIndex, X_INFO, "blu_mask: 0x%lx\n", pPriv->img->blue_mask);
     return pPriv;
 }
 
-void NestedvClientHideCursor(NestedvClientPrivatePtr pPriv)
-{
+void NestedvClientHideCursor(NestedvClientPrivatePtr pPriv) {
     char noData[]= {0,0,0,0,0,0,0,0};
     pPriv->color1.red = pPriv->color1.green = pPriv->color1.blue = 0;
+
     pPriv->bitmapNoData = XCreateBitmapFromData(pPriv->display,
-            pPriv->window, noData, 7, 7);
+                                                pPriv->window, noData, 7, 7);
+
     pPriv->mycursor = XCreatePixmapCursor(pPriv->display,
-            pPriv->bitmapNoData, pPriv->bitmapNoData,
-            &pPriv->color1, &pPriv->color1, 0, 0);
+                                          pPriv->bitmapNoData, pPriv->bitmapNoData,
+                                          &pPriv->color1, &pPriv->color1, 0, 0);
+
     XDefineCursor(pPriv->display, pPriv->window, pPriv->mycursor);
     XFreeCursor(pPriv->display, pPriv->mycursor);
 }
 
 char *
-NestedvClientGetFrameBuffer(NestedvClientPrivatePtr pPriv)
-{
+NestedvClientGetFrameBuffer(NestedvClientPrivatePtr pPriv) {
     return pPriv->img->data;
 }
 
 void
 NestedvClientUpdateScreen(NestedvClientPrivatePtr pPriv, int16_t x1,
-        int16_t y1, int16_t x2, int16_t y2)
-{
+                          int16_t y1, int16_t x2, int16_t y2) {
     if (pPriv->usingShm) {
         XShmPutImage(pPriv->display, pPriv->window, pPriv->gc, pPriv->img,
                 x1, y1, x1, y1, x2 - x1, y2 - y1, FALSE);
@@ -252,8 +249,7 @@ NestedvClientUpdateScreen(NestedvClientPrivatePtr pPriv, int16_t x1,
 }
 
 void
-NestedvClientTimerCallback(NestedvClientPrivatePtr pPriv)
-{
+NestedvClientTimerCallback(NestedvClientPrivatePtr pPriv) {
     XEvent ev;
     char *msg = "Cursor";
     char *msg2 = "Root";
@@ -280,8 +276,7 @@ NestedvClientTimerCallback(NestedvClientPrivatePtr pPriv)
 }
 
 void
-NestedvClientCloseScreen(NestedvClientPrivatePtr pPriv)
-{
+NestedvClientCloseScreen(NestedvClientPrivatePtr pPriv) {
     if (pPriv->usingShm) {
         XShmDetach(pPriv->display, &pPriv->shminfo);
         shmdt(pPriv->shminfo.shmaddr);
