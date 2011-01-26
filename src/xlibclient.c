@@ -111,11 +111,11 @@ NestedClientCreateScreen(int scrnIndex,
     XSetWMNormalHints(pPriv->display, pPriv->window, &sizeHints);
 
     XStoreName(pPriv->display, pPriv->window, "TTCCWN#123456");
-
+    
     XMapWindow(pPriv->display, pPriv->window);
 
     XSelectInput(pPriv->display, pPriv->window, ExposureMask | 
-                 PointerMotionMask);
+                 PointerMotionMask | EnterWindowMask | LeaveWindowMask );
 
     if (XShmQueryExtension(pPriv->display)) {
         if (XShmQueryVersion(pPriv->display, &shmMajor, &shmMinor,
@@ -258,19 +258,29 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
             NestedClientUpdateScreen(pPriv,
                                      ((XExposeEvent*)&ev)->x,
                                      ((XExposeEvent*)&ev)->y,
-                                     ((XExposeEvent*)&ev)->x + ((XExposeEvent*)&ev)->width,
-                                     ((XExposeEvent*)&ev)->y + ((XExposeEvent*)&ev)->height);
+                                     ((XExposeEvent*)&ev)->x + 
+                                     ((XExposeEvent*)&ev)->width,
+                                     ((XExposeEvent*)&ev)->y + 
+                                     ((XExposeEvent*)&ev)->height);
         }
 
         if (ev.type == MotionNotify) {
             XDrawString(pPriv->display, pPriv->window,
                         DefaultGC(pPriv->display, pPriv->screenNumber),
-                        ((XMotionEvent*)&ev)->x, ((XMotionEvent*)&ev)->y, msg,
-                        strlen(msg));
+                        ((XMotionEvent*)&ev)->x, ((XMotionEvent*)&ev)->y,
+                        msg, strlen(msg));
             XDrawString(pPriv->display, pPriv->window,
                         DefaultGC(pPriv->display, pPriv->screenNumber),
                         ((XMotionEvent*)&ev)->x_root,
                         ((XMotionEvent*)&ev)->y_root, msg2, strlen(msg2));
+        }
+
+        if (ev.type == EnterNotify) {
+            xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Cursor entered window!\n");
+        }
+
+        if (ev.type == LeaveNotify) {
+            xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Cursor left window!\n");
         }
     }
 }
@@ -283,6 +293,7 @@ NestedClientCloseScreen(NestedClientPrivatePtr pPriv) {
     } else {
         free(pPriv->img->data);
     }
+
     XDestroyImage(pPriv->img);
     XCloseDisplay(pPriv->display);
 }
