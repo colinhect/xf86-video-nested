@@ -62,7 +62,7 @@ _X_EXPORT XF86ModuleData nestedMouseModuleData =
 static InputInfoPtr 
 NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 {
-    InputInfoPtr        pInfo;
+    InputInfoPtr            pInfo;
     NestedMouseDevicePtr    pNestedMouse;
 
 
@@ -146,7 +146,36 @@ _nested_mouse_init_axes(DeviceIntPtr device)
 static int 
 NestedMouseControl(DeviceIntPtr device, int what)
 {
-    return NULL;
+    InputInfoPtr pInfo = device->public.devicePrivate;
+    NestedMouseDevicePtr pNestedMouse = pInfo->private;
+
+    switch(what)
+    {
+        case DEVICE_INIT:
+            _nested_mouse_init_buttons(device);
+            _nested_mouse_init_axes(device);
+            break;
+        case DEVICE_ON:
+            xf86Msg(X_INFO, "%s: On.\n", pInfo->name);
+            if (device->public.on)
+                break;
+            xf86FlushInput(pInfo->fd);
+            xf86AddEnabledDevice(pInfo);
+            device->public.on = TRUE;
+            break;
+        case DEVICE_OFF:
+            xf86Msg(X_INFO, "%s: Off.\n", pInfo->name);
+            if (!device->public.on)
+                break;
+            xf86RemoveEnabledDevice(pInfo);
+            pInfo->fd = -1;
+            device->public.on = FALSE;
+            break;
+        case DEVICE_CLOSE:
+            /* free what we have to free */
+            break;
+    }
+    return Success;
 }
 
 static void 
