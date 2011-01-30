@@ -32,6 +32,7 @@
 #include <xorg/xf86.h>
 #include <xorg/xf86Module.h>
 #include <xorg/xf86str.h>
+#include "xf86Xinput.h"
 
 #include "config.h"
 
@@ -81,6 +82,11 @@ Bool NestedAddMode(ScrnInfoPtr pScrn, int width, int height);
 void NestedPrintPscreen(ScrnInfoPtr p);
 void NestedPrintMode(ScrnInfoPtr p, DisplayModePtr m);
 
+static InputInfoPtr NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags);
+
+static void NestedMouseUnInit(InputDriverPtr drv, InputInfoPtr pInfo,
+int flags);
+
 typedef enum {
     OPTION_DISPLAY,
     OPTION_ORIGIN
@@ -115,6 +121,16 @@ _X_EXPORT DriverRec NESTED = {
     NestedDriverFunc,
     NULL, /* DeviceMatch */
     0     /* PciProbe */
+};
+
+_X_EXPORT InputDriverRec MOUSE = {
+    1,
+    "random",
+    NULL,
+    NestedMousePreInit,
+    NestedMouseUnInit,
+    NULL,
+    0,
 };
 
 static XF86ModuleVersionInfo NestedVersRec = {
@@ -388,6 +404,20 @@ static Bool NestedPreInit(ScrnInfoPtr pScrn, int flags) {
 
     return TRUE;
 }
+
+static InputInfoPtr 
+NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags)
+{
+    return NULL;
+}
+
+static void
+NestedMouseUnInit(InputDriverPtr       drv,
+             InputInfoPtr         pInfo,
+             int                  flags)
+{
+}
+
 
 int
 NestedValidateModes(ScrnInfoPtr pScrn) {
