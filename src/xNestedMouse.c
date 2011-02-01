@@ -1,4 +1,5 @@
-#include <stdlib.h>
+#include <fcntl.h>
+#include <string.h>
 #include <string.h>
 
 #include <xorg/xorg-server.h>
@@ -15,6 +16,7 @@
 
 #include "client.h"
 
+#include "xNestedMouse.h"
 
 static InputInfoPtr NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags);
 static void NestedMouseUnInit(InputDriverPtr drv, InputInfoPtr pInfo, int flags);
@@ -24,8 +26,6 @@ static void NestedMouseReadInput(InputInfoPtr pInfo);
 static int NestedMouseControl(DeviceIntPtr    device,int what);
 static int _nested_mouse_init_buttons(DeviceIntPtr device);
 static int _nested_mouse_init_axes(DeviceIntPtr device);
-
-
 
 _X_EXPORT InputDriverRec NESTEDMOUSE = {
     1,
@@ -37,8 +37,7 @@ _X_EXPORT InputDriverRec NESTEDMOUSE = {
     0,
 };
 
-static XF86ModuleVersionInfo NestedMouseVersionRec =
-{
+static XF86ModuleVersionInfo NestedMouseVersionRec = {
     "nestedmouse",
     MODULEVENDORSTRING,
     MODINFOSTRING1,
@@ -52,24 +51,22 @@ static XF86ModuleVersionInfo NestedMouseVersionRec =
     {0, 0, 0, 0}
 };
 
-_X_EXPORT XF86ModuleData nestedMouseModuleData =
-{
+_X_EXPORT XF86ModuleData nestedMouseModuleData = {
     &NestedMouseVersionRec,
-    &NestedMouseVersionRecPlug,
-    &NestedMouseVersionRecUnplug
+    &NestedMousePlug,
+    &NestedMouseUnplug
 };
 
 static InputInfoPtr 
-NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags)
-{
+NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
     InputInfoPtr            pInfo;
     NestedMouseDevicePtr    pNestedMouse;
-
 
     if (!(pInfo = xf86AllocateInput(drv, 0)))
         return NULL;
 
     pNestedMouse = xcalloc(1, sizeof(NestedMouseDeviceRec));
+
     if (!pNestedMouse) {
         pInfo->private = NULL;
         xf86DeleteInput(pInfo, 0);
@@ -84,6 +81,7 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     pInfo->read_input = NestedMouseReadInput; /* new data avl */
     pInfo->switch_mode = NULL; /* toggle absolute/relative mode */
     pInfo->device_control = NestedMouseControl; /* enable/disable dev */
+
     /* process driver specific options */
     pNestedMouse->device = xf86SetStrOption(dev->commonOptions,
                                          "Device",
@@ -94,10 +92,11 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     /* process generic options */
     xf86CollectInputOptions(pInfo, NULL, NULL);
     xf86ProcessCommonOptions(pInfo, pInfo->options);
+    
     /* Open sockets, init device files, etc. */
     SYSCALL(pInfo->fd = open(pNestedMouse->device, O_RDWR | O_NONBLOCK));
-    if (pInfo->fd == -1)
-    {
+    
+    if (pInfo->fd == -1) {
         xf86Msg(X_ERROR, "%s: failed to open %s.",
                 pInfo->name, pNestedMouse->device);
         pInfo->private = NULL;
@@ -105,6 +104,7 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags)
         xf86DeleteInput(pInfo, 0);
         return NULL;
     }
+    
     /* do more funky stuff */
     close(pInfo->fd);
     pInfo->fd = -1;
@@ -115,42 +115,35 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 
 
 static void
-NestedMouseUnInit(InputDriverPtr drv, InputInfoPtr pInfo, int flags)
-{
+NestedMouseUnInit(InputDriverPtr drv, InputInfoPtr pInfo, int flags) {
 }
 
 static pointer
-NestedMousePlug(pointer module, pointer options, int *errmaj, int  *errmin)
-{
+NestedMousePlug(pointer module, pointer options, int *errmaj, int  *errmin) {
     xf86AddInputDriver(&NESTEDMOUSE, module, 0);
     return module;
 };
 
 static void
-NestedMouseUnplug(pointer p)
-{
+NestedMouseUnplug(pointer p) {
 };
 
 static int
-_nested_mouse_init_buttons(DeviceIntPtr device)
-{
+_nested_mouse_init_buttons(DeviceIntPtr device) {
     return NULL;
 }
 
 static int
-_nested_mouse_init_axes(DeviceIntPtr device)
-{
+_nested_mouse_init_axes(DeviceIntPtr device) {
     return NULL;
 }
 
 static int 
-NestedMouseControl(DeviceIntPtr device, int what)
-{
+NestedMouseControl(DeviceIntPtr device, int what) {
     InputInfoPtr pInfo = device->public.devicePrivate;
     NestedMouseDevicePtr pNestedMouse = pInfo->private;
 
-    switch(what)
-    {
+    switch (what) {
         case DEVICE_INIT:
             _nested_mouse_init_buttons(device);
             _nested_mouse_init_axes(device);
@@ -179,6 +172,5 @@ NestedMouseControl(DeviceIntPtr device, int what)
 }
 
 static void 
-NestedMouseReadInput(InputInfoPtr pInfo)
-{
+NestedMouseReadInput(InputInfoPtr pInfo) {
 }

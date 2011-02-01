@@ -27,4 +27,4 @@ nested_drv_la_LTLIBRARIES = nested_drv.la
 nested_drv_la_LDFLAGS = -module -avoid-version $(X11_LIBS) $(XEXT_LIBS)
 nested_drv_ladir = @moduledir@/drivers
 
-nested_drv_la_SOURCES = driver.c xlibclient.c client.h
+nested_drv_la_SOURCES = driver.c xNestedMouse.c xlibclient.c client.h
