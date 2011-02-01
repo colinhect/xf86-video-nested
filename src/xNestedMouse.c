@@ -1,6 +1,7 @@
 #include <fcntl.h>
+#include <stdlib.h>
 #include <string.h>
-#include <string.h>
+#include <unistd.h>
 
 #include <xorg/xorg-server.h>
 #include <xorg/fb.h>
@@ -113,7 +114,6 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
     return pInfo;
 }
 
-
 static void
 NestedMouseUnInit(InputDriverPtr drv, InputInfoPtr pInfo, int flags) {
 }
@@ -122,20 +122,20 @@ static pointer
 NestedMousePlug(pointer module, pointer options, int *errmaj, int  *errmin) {
     xf86AddInputDriver(&NESTEDMOUSE, module, 0);
     return module;
-};
+}
 
 static void
 NestedMouseUnplug(pointer p) {
-};
+}
 
 static int
 _nested_mouse_init_buttons(DeviceIntPtr device) {
-    return NULL;
+    return -1;
 }
 
 static int
 _nested_mouse_init_axes(DeviceIntPtr device) {
-    return NULL;
+    return -1;
 }
 
 static int 
@@ -168,6 +168,7 @@ NestedMouseControl(DeviceIntPtr device, int what) {
             /* free what we have to free */
             break;
     }
+
     return Success;
 }
 
