@@ -175,3 +175,9 @@ NestedMouseControl(DeviceIntPtr device, int what) {
 static void 
 NestedMouseReadInput(InputInfoPtr pInfo) {
 }
+
+//Helper func to load mouse driver at the init of nested video driver
+void Load_Nested_Mouse(pointer module) {
+    xf86Msg(X_INFO, "NESTED MOUSE LOADING\n");
+    xf86AddInputDriver(&NESTEDMOUSE, module, 0);
+}

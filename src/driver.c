@@ -38,6 +38,8 @@
 
 #include "client.h"
 
+#include "xNestedMouse.h"
+
 #define NESTED_VERSION 0
 #define NESTED_NAME "NESTED"
 #define NESTED_DRIVER_NAME "nested"
@@ -165,6 +167,7 @@ NestedSetup(pointer module, pointer opts, int *errmaj, int *errmin) {
     if (!setupDone) {
         setupDone = TRUE;
         xf86AddDriver(&NESTED, module, HaveDriverFuncs);
+        Load_Nested_Mouse(module);
         
         return (pointer)1;
     } else {

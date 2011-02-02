@@ -9,3 +9,5 @@ typedef struct _NestedMouseDeviceRec {
     int num_vals;
     int axes;
 } NestedMouseDeviceRec, *NestedMouseDevicePtr;
+
+void Load_Nested_Mouse(pointer module);
