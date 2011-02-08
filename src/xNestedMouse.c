@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +20,8 @@
 
 #include "xNestedMouse.h"
 
+#define SYSCALL(call) while (((call) == -1) && (errno == EINTR))
+
 static InputInfoPtr NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags);
 static void NestedMouseUnInit(InputDriverPtr drv, InputInfoPtr pInfo, int flags);
 static pointer NestedMousePlug(pointer module, pointer options, int *errmaj, int  *errmin);
@@ -37,6 +40,14 @@ _X_EXPORT InputDriverRec NESTEDMOUSE = {
     NULL,
     0,
 };
+
+typedef struct _NestedMouseDeviceRec {
+    char *device;
+    int version;        /* Driver version */
+    Atom* labels;
+    int num_vals;
+    int axes;
+} NestedMouseDeviceRec, *NestedMouseDevicePtr;
 
 static XF86ModuleVersionInfo NestedMouseVersionRec = {
     "nestedmouse",
