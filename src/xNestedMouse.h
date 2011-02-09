@@ -1,6 +1,6 @@
 
-extern int NestedMouseMotion;
-extern int NestedKeyPress;
+#define NestedMouseMotion 1
+#define NestedKeyPress 2
 
 typedef struct {
     int x;

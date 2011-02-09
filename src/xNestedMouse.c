@@ -22,9 +22,6 @@
 
 #define SYSCALL(call) while (((call) == -1) && (errno == EINTR))
 
-int NestedMouseMotion  = 1;
-int NestedKeyPress = 2;
-
 static InputInfoPtr NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags);
 static void NestedMouseUnInit(InputDriverPtr drv, InputInfoPtr pInfo, int flags);
 static pointer NestedMousePlug(pointer module, pointer options, int *errmaj, int  *errmin);
@@ -197,5 +194,7 @@ void Load_Nested_Mouse(pointer module) {
 }
 
 void NestedPostInputEvent(NestedInputEvent event) {
-
+    if (event.type == NestedMouseMotion) {
+        xf86Msg(X_ERROR, "Received mouse motion event: %i %i\n", event.data.mouseMotion.x, event.data.mouseMotion.y);
+    }
 }
