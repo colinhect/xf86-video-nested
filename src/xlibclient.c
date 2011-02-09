@@ -115,7 +115,8 @@ NestedClientCreateScreen(int scrnIndex,
     XMapWindow(pPriv->display, pPriv->window);
 
     XSelectInput(pPriv->display, pPriv->window, ExposureMask | 
-                 PointerMotionMask | EnterWindowMask | LeaveWindowMask );
+                 PointerMotionMask | EnterWindowMask | LeaveWindowMask | ButtonPressMask |
+		 KeyPressMask );
 
     if (XShmQueryExtension(pPriv->display)) {
         if (XShmQueryVersion(pPriv->display, &shmMajor, &shmMinor,
@@ -281,6 +282,14 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
 
         if (ev.type == LeaveNotify) {
             xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Cursor left window!\n");
+        }
+
+	if (ev.type == ButtonPress) {
+            xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Button Pressed!\n");//ev.xkey.keycode);
+        }
+
+	if (ev.type == KeyPress) {
+            xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Key Pressed!--%d\n",ev.xkey.keycode);
         }
     }
 }
