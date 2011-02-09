@@ -299,7 +299,6 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
         }
 
 	if (ev.type == ButtonPress) {
-            //xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Button Pressed!");//ev.xkey.keycode);
 	    switch (ev.xbutton.button)
 	    {
 		case Button1: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Left Mouse Button Pressed\n");
@@ -315,8 +314,7 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
         }
 
 	if (ev.type == ButtonRelease) {
-            //xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Button Released!\n");//ev.xkey.keycode);
-	    switch (ev.xbutton.button)
+            switch (ev.xbutton.button)
 	    {
 		case Button1: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Left Mouse Button Released\n");
 		    break;
