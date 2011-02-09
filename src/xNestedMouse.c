@@ -22,6 +22,9 @@
 
 #define SYSCALL(call) while (((call) == -1) && (errno == EINTR))
 
+int NestedMouseMotion  = 1;
+int NestedKeyPress = 2;
+
 static InputInfoPtr NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags);
 static void NestedMouseUnInit(InputDriverPtr drv, InputInfoPtr pInfo, int flags);
 static pointer NestedMousePlug(pointer module, pointer options, int *errmaj, int  *errmin);
