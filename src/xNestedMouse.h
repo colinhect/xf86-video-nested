@@ -16,7 +16,7 @@ typedef union {
     NestedKeyPressData keyPress;
 } NestedInputData;
 
-typedef union {
+typedef struct {
     int type;
     NestedInputData data;
 } NestedInputEvent;

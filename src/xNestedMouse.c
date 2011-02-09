@@ -194,7 +194,10 @@ void Load_Nested_Mouse(pointer module) {
 }
 
 void NestedPostInputEvent(NestedInputEvent event) {
+    
     if (event.type == NestedMouseMotion) {
-        xf86Msg(X_ERROR, "Received mouse motion event: %i %i\n", event.data.mouseMotion.x, event.data.mouseMotion.y);
+        xf86Msg(X_ERROR, "Received nested mouse motion event: %i %i\n", event.data.mouseMotion.x, event.data.mouseMotion.y);
+    } else {
+        xf86Msg(X_ERROR, "Received unknown nested event: %i\n", event.type);
     }
 }
