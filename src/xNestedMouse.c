@@ -192,3 +192,7 @@ void Load_Nested_Mouse(pointer module) {
     xf86Msg(X_INFO, "NESTED MOUSE LOADING\n");
     xf86AddInputDriver(&NESTEDMOUSE, module, 0);
 }
+
+void NestedPostInputEvent(NestedInputEvent event) {
+
+}
