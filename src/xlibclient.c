@@ -116,7 +116,7 @@ NestedClientCreateScreen(int scrnIndex,
 
     XSelectInput(pPriv->display, pPriv->window, ExposureMask | 
                  PointerMotionMask | EnterWindowMask | LeaveWindowMask | ButtonPressMask |
-		 KeyPressMask );
+		 ButtonReleaseMask | KeyPressMask |KeyReleaseMask);
 
     if (XShmQueryExtension(pPriv->display)) {
         if (XShmQueryVersion(pPriv->display, &shmMajor, &shmMinor,
@@ -285,11 +285,43 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
         }
 
 	if (ev.type == ButtonPress) {
-            xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Button Pressed!\n");//ev.xkey.keycode);
+            //xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Button Pressed!");//ev.xkey.keycode);
+	    switch (ev.xbutton.button)
+	    {
+		case Button1: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Left Mouse Button Pressed\n");
+		    break;
+		case Button2: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Middle Mouse Button Pressed\n");
+		    break;
+		case Button3: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Right Mouse Button Pressed\n");
+		    break;
+		case Button4: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Up Pressed\n");
+		    break;
+		case Button5: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Down Pressed\n");
+	    }
+        }
+
+	if (ev.type == ButtonRelease) {
+            //xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Button Released!\n");//ev.xkey.keycode);
+	    switch (ev.xbutton.button)
+	    {
+		case Button1: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Left Mouse Button Released\n");
+		    break;
+		case Button2: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Middle Mouse Button Released\n");
+		    break;
+		case Button3: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Right Mouse Button Released\n");
+		    break;
+		case Button4: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Up Released\n");
+		    break;
+		case Button5: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Down Released\n");
+	    }
         }
 
 	if (ev.type == KeyPress) {
             xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Key Pressed!--%d\n",ev.xkey.keycode);
+        }
+
+	if (ev.type == KeyRelease) {
+            xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Key Released!--%d\n",ev.xkey.keycode);
         }
     }
 }
