@@ -34,6 +34,8 @@
 
 #include "client.h"
 
+#include "xNestedMouse.h"
+
 struct NestedClientPrivate {
     Display *display;
     int screenNumber;
@@ -266,6 +268,17 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
         }
 
         if (ev.type == MotionNotify) {
+    
+            // Create a nested input event and send it to the input driver.
+            NestedInputEvent nev;
+            nev.type = NestedMouseMotion;
+
+            nev.data.mouseMotion.x = ((XMotionEvent*)&ev)->x;
+            nev.data.mouseMotion.y = ((XMotionEvent*)&ev)->y;
+        
+            NestedPostInputEvent(nev);
+   
+            /* 
             XDrawString(pPriv->display, pPriv->window,
                         DefaultGC(pPriv->display, pPriv->screenNumber),
                         ((XMotionEvent*)&ev)->x, ((XMotionEvent*)&ev)->y,
@@ -274,6 +287,7 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
                         DefaultGC(pPriv->display, pPriv->screenNumber),
                         ((XMotionEvent*)&ev)->x_root,
                         ((XMotionEvent*)&ev)->y_root, msg2, strlen(msg2));
+            */
         }
 
         if (ev.type == EnterNotify) {
