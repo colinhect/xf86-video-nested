@@ -120,6 +120,15 @@ _X_EXPORT DriverRec NESTED = {
     0     /* PciProbe */
 };
 
+_X_EXPORT InputDriverRec NESTEDMOUSE = {
+    1,
+    "nestedmouse",
+    NULL,
+    NestedMousePreInit,
+    NestedMouseUnInit,
+    NULL,
+    0,
+};
 
 static XF86ModuleVersionInfo NestedVersRec = {
     NESTED_DRIVER_NAME,
@@ -147,7 +156,7 @@ typedef struct NestedPrivate {
     char                        *displayName;
     int                          originX;
     int                          originY;
-    NestedClientPrivatePtr      clientData;
+    NestedClientPrivatePtr       clientData;
     CreateScreenResourcesProcPtr CreateScreenResources;
     CloseScreenProcPtr           CloseScreen;
     OsTimerPtr                   timer;
@@ -172,10 +181,9 @@ NestedSetup(pointer module, pointer opts, int *errmaj, int *errmin) {
 
     if (!setupDone) {
         setupDone = TRUE;
+        
         xf86AddDriver(&NESTED, module, HaveDriverFuncs);
-    
-        //pNested->timer = 
-        TimerSet(NULL, 0, 1, NestedMouseTimer, module);
+        xf86AddInputDriver(&NESTEDMOUSE, module, 0);
         
         return (pointer)1;
     } else {
@@ -214,7 +222,6 @@ NestedProbe(DriverPtr drv, int flags) {
                                           &devSections)) <= 0) {
         return FALSE;
     }
-
 
     if (numDevSections > 0) {
         for(i = 0; i < numDevSections; i++) {
@@ -398,7 +405,7 @@ static Bool NestedPreInit(ScrnInfoPtr pScrn, int flags) {
 
     pScrn->memPhysBase = 0;
     pScrn->fbOffset = 0;
-
+    
     return TRUE;
 }
 
@@ -592,6 +599,8 @@ static Bool NestedScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
 
     /* Save state:
      * NestedSave(pScrn); */
+    
+    //Load_Nested_Mouse();
 
     pNested->clientData = NestedClientCreateScreen(scrnIndex,
                                                    pNested->displayName,
@@ -602,10 +611,13 @@ static Bool NestedScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
                                                    pScrn->depth,
                                                    pScrn->bitsPerPixel,
                                                    &redMask, &greenMask, &blueMask);
+    
     if (!pNested->clientData) {
         xf86DrvMsg(scrnIndex, X_ERROR, "Failed to create client screen\n");
         return FALSE;
     }
+    
+    TimerSet(NULL, 0, 1, NestedMouseTimer, pNested->clientData);
 
     miClearVisualTypes();
     if (!miSetVisualTypesAndMasks(pScrn->depth,

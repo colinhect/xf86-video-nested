@@ -50,6 +50,8 @@ struct NestedClientPrivate {
     Cursor mycursor; /* Test cursor */
     Pixmap bitmapNoData;
     XColor color1;
+    
+    void* dev;
 };
 
 /* Checks if a display is open */
@@ -211,7 +213,9 @@ xf86DrvMsg(scrnIndex, X_INFO, "blu_mask: 0x%lx\n", pPriv->img->blue_mask);
             break;
         }
     }
-    
+   
+    pPriv->dev = NULL;
+ 
     return pPriv;
 }
 
@@ -268,6 +272,10 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
         }
 
         if (ev.type == MotionNotify) {
+            int x = ((XMotionEvent*)&ev)->x;
+            int y = ((XMotionEvent*)&ev)->y;
+
+            NestedPostMouseMotion(pPriv->dev, x, y);
             /* 
             XDrawString(pPriv->display, pPriv->window,
                         DefaultGC(pPriv->display, pPriv->screenNumber),
@@ -337,4 +345,8 @@ NestedClientCloseScreen(NestedClientPrivatePtr pPriv) {
 
     XDestroyImage(pPriv->img);
     XCloseDisplay(pPriv->display);
+}
+
+void NestedClientSetDevicePtr(NestedClientPrivatePtr pPriv, void* dev) {
+    pPriv->dev = dev;
 }

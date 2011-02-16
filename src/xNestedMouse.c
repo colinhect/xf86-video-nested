@@ -12,7 +12,6 @@
 #include <xorg/xf86.h>
 #include <xorg/xf86Module.h>
 #include <xorg/xf86str.h>
-#include "xf86Xinput.h"
 
 #include "config.h"
 
@@ -22,24 +21,12 @@
 
 #define SYSCALL(call) while (((call) == -1) && (errno == EINTR))
 
-static InputInfoPtr NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags);
-static void NestedMouseUnInit(InputDriverPtr drv, InputInfoPtr pInfo, int flags);
 static pointer NestedMousePlug(pointer module, pointer options, int *errmaj, int  *errmin);
 static void NestedMouseUnplug(pointer p);
 static void NestedMouseReadInput(InputInfoPtr pInfo);
 static int NestedMouseControl(DeviceIntPtr    device,int what);
 static int _nested_mouse_init_buttons(DeviceIntPtr device);
 static int _nested_mouse_init_axes(DeviceIntPtr device);
-
-_X_EXPORT InputDriverRec NESTEDMOUSE = {
-    1,
-    "nestedmouse",
-    NULL,
-    NestedMousePreInit,
-    NestedMouseUnInit,
-    NULL,
-    0,
-};
 
 typedef struct _NestedMouseDeviceRec {
     char *device;
@@ -69,7 +56,7 @@ _X_EXPORT XF86ModuleData nestedMouseModuleData = {
     &NestedMouseUnplug
 };
 
-static InputInfoPtr 
+InputInfoPtr 
 NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
     InputInfoPtr            pInfo;
     NestedMouseDevicePtr    pNestedMouse;
@@ -97,7 +84,7 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
     /* process driver specific options */
     pNestedMouse->device = xf86SetStrOption(dev->commonOptions,
                                             "Device",
-                                            "/dev/null");
+                                            "/dev/random");
 
     xf86Msg(X_INFO, "%s: Using device %s.\n", pInfo->name, pNestedMouse->device);
 
@@ -111,9 +98,12 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
     if (pInfo->fd == -1) {
         xf86Msg(X_ERROR, "%s: failed to open %s.",
                 pInfo->name, pNestedMouse->device);
+
         pInfo->private = NULL;
+
         xfree(pNestedMouse);
         xf86DeleteInput(pInfo, 0);
+
         return NULL;
     }
     
@@ -122,13 +112,13 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
     return pInfo;
 }
 
-static void
+void
 NestedMouseUnInit(InputDriverPtr drv, InputInfoPtr pInfo, int flags) {
 }
 
 static pointer
 NestedMousePlug(pointer module, pointer options, int *errmaj, int  *errmin) {
-    xf86AddInputDriver(&NESTEDMOUSE, module, 0);
+    //xf86AddInputDriver(&NESTEDMOUSE, module, 0);
     return module;
 }
 
@@ -185,10 +175,10 @@ NestedMouseReadInput(InputInfoPtr pInfo) {
 }
 
 //Helper func to load mouse driver at the init of nested video driver
-void Load_Nested_Mouse(pointer module) {
+void Load_Nested_Mouse(NestedClientPrivatePtr clientData) {
     xf86Msg(X_INFO, "NESTED MOUSE LOADING\n");
 
-    xf86AddInputDriver(&NESTEDMOUSE, module, 0);
+    //xf86AddInputDriver(&NESTEDMOUSE, module, 0);
 
     // Create input options for our invocation to NewInputDeviceRequest().   
     InputOption* options = (InputOption*)xalloc(sizeof(InputOption));
@@ -209,6 +199,18 @@ void Load_Nested_Mouse(pointer module) {
         xf86Msg(X_ERROR, "Failed to load input driver.\n");
     }
 
+    InputInfoPtr pInfo = dev->public.devicePrivate;
+    NestedClientSetDevicePtr(clientData, pInfo->dev);
+
     xf86Msg(X_INFO, "NESTED MOUSE LOADING DONE\n");
 }
     
+void NestedPostMouseMotion(void* dev, int x, int y) {
+    xf86Msg(X_INFO, "Mouse move: %i %i\n", x, y);
+
+    if (dev == NULL) {
+        xf86Msg(X_ERROR, "Null device.\n");
+    }
+
+    xf86PostMotionEvent(dev, 1, 0, 2, 1, 1);
+}
