@@ -166,8 +166,8 @@ NestedSetup(pointer module, pointer opts, int *errmaj, int *errmin) {
 
     if (!setupDone) {
         setupDone = TRUE;
-        xf86AddDriver(&NESTED, module, HaveDriverFuncs);
         Load_Nested_Mouse(module);
+        xf86AddDriver(&NESTED, module, HaveDriverFuncs);
         
         return (pointer)1;
     } else {

@@ -112,13 +112,13 @@ NestedClientCreateScreen(int scrnIndex,
     sizeHints.max_height = height;
     XSetWMNormalHints(pPriv->display, pPriv->window, &sizeHints);
 
-    XStoreName(pPriv->display, pPriv->window, "TTCCWN#123456");
+    XStoreName(pPriv->display, pPriv->window, "Title");
     
     XMapWindow(pPriv->display, pPriv->window);
 
     XSelectInput(pPriv->display, pPriv->window, ExposureMask | 
                  PointerMotionMask | EnterWindowMask | LeaveWindowMask | ButtonPressMask |
-		 ButtonReleaseMask | KeyPressMask |KeyReleaseMask);
+         ButtonReleaseMask | KeyPressMask |KeyReleaseMask);
 
     if (XShmQueryExtension(pPriv->display)) {
         if (XShmQueryVersion(pPriv->display, &shmMajor, &shmMinor,
@@ -211,7 +211,7 @@ xf86DrvMsg(scrnIndex, X_INFO, "blu_mask: 0x%lx\n", pPriv->img->blue_mask);
             break;
         }
     }
-
+    
     return pPriv;
 }
 
@@ -268,16 +268,6 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
         }
 
         if (ev.type == MotionNotify) {
-    
-            // Create a nested input event and send it to the input driver.
-            NestedInputEvent nev;
-            nev.type = NestedMouseMotion;
-
-            nev.data.mouseMotion.x = ((XMotionEvent*)&ev)->x;
-            nev.data.mouseMotion.y = ((XMotionEvent*)&ev)->y;
-        
-            NestedPostInputEvent(nev);
-   
             /* 
             XDrawString(pPriv->display, pPriv->window,
                         DefaultGC(pPriv->display, pPriv->screenNumber),
@@ -298,41 +288,39 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
             xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Cursor left window!\n");
         }
 
-	if (ev.type == ButtonPress) {
-	    switch (ev.xbutton.button)
-	    {
-		case Button1: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Left Mouse Button Pressed\n");
-		    break;
-		case Button2: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Middle Mouse Button Pressed\n");
-		    break;
-		case Button3: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Right Mouse Button Pressed\n");
-		    break;
-		case Button4: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Up Pressed\n");
-		    break;
-		case Button5: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Down Pressed\n");
-	    }
+        if (ev.type == ButtonPress) {
+            switch (ev.xbutton.button) {
+            case Button1: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Left Mouse Button Pressed\n");
+                break;
+            case Button2: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Middle Mouse Button Pressed\n");
+                break;
+            case Button3: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Right Mouse Button Pressed\n");
+                break;
+            case Button4: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Up Pressed\n");
+                break;
+            case Button5: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Down Pressed\n");
+            }
         }
 
-	if (ev.type == ButtonRelease) {
-            switch (ev.xbutton.button)
-	    {
-		case Button1: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Left Mouse Button Released\n");
-		    break;
-		case Button2: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Middle Mouse Button Released\n");
-		    break;
-		case Button3: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Right Mouse Button Released\n");
-		    break;
-		case Button4: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Up Released\n");
-		    break;
-		case Button5: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Down Released\n");
-	    }
+        if (ev.type == ButtonRelease) {
+            switch (ev.xbutton.button) {
+            case Button1: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Left Mouse Button Released\n");
+                break;
+            case Button2: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Middle Mouse Button Released\n");
+                break;
+            case Button3: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Right Mouse Button Released\n");
+                break;
+            case Button4: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Up Released\n");
+                break;
+            case Button5: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Down Released\n");
+            }
         }
 
-	if (ev.type == KeyPress) {
+        if (ev.type == KeyPress) {
             xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Key Pressed!--%d\n",ev.xkey.keycode);
         }
 
-	if (ev.type == KeyRelease) {
+        if (ev.type == KeyRelease) {
             xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Key Released!--%d\n",ev.xkey.keycode);
         }
     }

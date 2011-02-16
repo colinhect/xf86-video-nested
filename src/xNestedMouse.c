@@ -100,6 +100,8 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
                                          "/dev/nestedmouse");
 
     xf86Msg(X_INFO, "%s: Using device %s.\n", pInfo->name, pNestedMouse->device);
+    
+    xf86Msg(X_ERROR, "PreInitPreInitPreInitPreInitPreInitPreInit");
 
     /* process generic options */
     xf86CollectInputOptions(pInfo, NULL, NULL);
@@ -191,13 +193,40 @@ NestedMouseReadInput(InputInfoPtr pInfo) {
 void Load_Nested_Mouse(pointer module) {
     xf86Msg(X_INFO, "NESTED MOUSE LOADING\n");
     xf86AddInputDriver(&NESTEDMOUSE, module, 0);
-}
+   
+    /*
+    InputOption driverOption = {
+        "driver",
+        "nestedmouse",
+        NULL
+    };
 
-void NestedPostInputEvent(NestedInputEvent event) {
+    InputOption options = {
+        "identifier",
+        "nesmouse",
+        &driverOption
+        //NULL
+    };
+*/
+ 
+    InputOption* options = (InputOption*)xalloc(sizeof(InputOption));
     
-    if (event.type == NestedMouseMotion) {
-        xf86Msg(X_ERROR, "Received nested mouse motion event: %i %i\n", event.data.mouseMotion.x, event.data.mouseMotion.y);
-    } else {
-        xf86Msg(X_ERROR, "Received unknown nested event: %i\n", event.type);
+    options->key = "driver";
+    options->value = "nestedmouse";
+
+    options->next = (InputOption*)xalloc(sizeof(InputOption));
+    
+    options->next->key = "identifier";
+    options->next->value = "nestedmouse";
+    options->next->next = NULL;
+
+    DeviceIntPtr dev;
+    int ret = NewInputDeviceRequest(options, NULL, &dev);
+    
+    if (ret == Success) {
+        //xf86Msg(X_INFO, "Success\n");
     }
+
+    xf86Msg(X_INFO, "NESTED MOUSE LOADING DONE\n");
 }
+    
