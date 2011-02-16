@@ -96,8 +96,8 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
 
     /* process driver specific options */
     pNestedMouse->device = xf86SetStrOption(dev->commonOptions,
-                                         "Device",
-                                         "/dev/nestedmouse");
+                                            "Device",
+                                            "/dev/random");
 
     xf86Msg(X_INFO, "%s: Using device %s.\n", pInfo->name, pNestedMouse->device);
     
@@ -120,8 +120,8 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
     }
     
     /* do more funky stuff */
-    close(pInfo->fd);
-    pInfo->fd = -1;
+  //  close(pInfo->fd);
+   // pInfo->fd = -1;
     pInfo->flags |= XI86_OPEN_ON_INIT;
     pInfo->flags |= XI86_CONFIGURED;
     return pInfo;
@@ -194,21 +194,6 @@ void Load_Nested_Mouse(pointer module) {
     xf86Msg(X_INFO, "NESTED MOUSE LOADING\n");
     xf86AddInputDriver(&NESTEDMOUSE, module, 0);
    
-    /*
-    InputOption driverOption = {
-        "driver",
-        "nestedmouse",
-        NULL
-    };
-
-    InputOption options = {
-        "identifier",
-        "nesmouse",
-        &driverOption
-        //NULL
-    };
-*/
- 
     InputOption* options = (InputOption*)xalloc(sizeof(InputOption));
     
     options->key = "driver";

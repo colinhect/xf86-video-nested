@@ -160,14 +160,22 @@ typedef struct NestedPrivate {
 
 /*static ScrnInfoPtr NESTEDScrn;*/
 
+static CARD32
+NestedMouseTimer(OsTimerPtr timer, CARD32 time, pointer arg) {
+    Load_Nested_Mouse(arg);
+    return 0;
+}
+
 static pointer
 NestedSetup(pointer module, pointer opts, int *errmaj, int *errmin) {
     static Bool setupDone = FALSE;
 
     if (!setupDone) {
         setupDone = TRUE;
-        Load_Nested_Mouse(module);
         xf86AddDriver(&NESTED, module, HaveDriverFuncs);
+    
+        //pNested->timer = 
+        TimerSet(NULL, 0, 1, NestedMouseTimer, module);
         
         return (pointer)1;
     } else {
