@@ -97,11 +97,9 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
     /* process driver specific options */
     pNestedMouse->device = xf86SetStrOption(dev->commonOptions,
                                             "Device",
-                                            "/dev/random");
+                                            "/dev/null");
 
     xf86Msg(X_INFO, "%s: Using device %s.\n", pInfo->name, pNestedMouse->device);
-    
-    xf86Msg(X_ERROR, "PreInitPreInitPreInitPreInitPreInitPreInit");
 
     /* process generic options */
     xf86CollectInputOptions(pInfo, NULL, NULL);
@@ -119,9 +117,6 @@ NestedMousePreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
         return NULL;
     }
     
-    /* do more funky stuff */
-  //  close(pInfo->fd);
-   // pInfo->fd = -1;
     pInfo->flags |= XI86_OPEN_ON_INIT;
     pInfo->flags |= XI86_CONFIGURED;
     return pInfo;
@@ -192,8 +187,10 @@ NestedMouseReadInput(InputInfoPtr pInfo) {
 //Helper func to load mouse driver at the init of nested video driver
 void Load_Nested_Mouse(pointer module) {
     xf86Msg(X_INFO, "NESTED MOUSE LOADING\n");
+
     xf86AddInputDriver(&NESTEDMOUSE, module, 0);
-   
+
+    // Create input options for our invocation to NewInputDeviceRequest().   
     InputOption* options = (InputOption*)xalloc(sizeof(InputOption));
     
     options->key = "driver";
@@ -208,8 +205,8 @@ void Load_Nested_Mouse(pointer module) {
     DeviceIntPtr dev;
     int ret = NewInputDeviceRequest(options, NULL, &dev);
     
-    if (ret == Success) {
-        //xf86Msg(X_INFO, "Success\n");
+    if (ret != Success) {
+        xf86Msg(X_ERROR, "Failed to load input driver.\n");
     }
 
     xf86Msg(X_INFO, "NESTED MOUSE LOADING DONE\n");
