@@ -33,8 +33,7 @@
 #include <xorg/xf86.h>
 
 #include "client.h"
-
-#include "xNestedMouse.h"
+#include "input.h"
 
 struct NestedClientPrivate {
     Display *display;
@@ -271,69 +270,32 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
                                      ((XExposeEvent*)&ev)->height);
         }
 
+        // Post mouse motion events to input driver.
         if (ev.type == MotionNotify) {
             int x = ((XMotionEvent*)&ev)->x;
             int y = ((XMotionEvent*)&ev)->y;
 
-            NestedPostMouseMotion(pPriv->dev, x, y);
-            /* 
-            XDrawString(pPriv->display, pPriv->window,
-                        DefaultGC(pPriv->display, pPriv->screenNumber),
-                        ((XMotionEvent*)&ev)->x, ((XMotionEvent*)&ev)->y,
-                        msg, strlen(msg));
-            XDrawString(pPriv->display, pPriv->window,
-                        DefaultGC(pPriv->display, pPriv->screenNumber),
-                        ((XMotionEvent*)&ev)->x_root,
-                        ((XMotionEvent*)&ev)->y_root, msg2, strlen(msg2));
-            */
+            NestedInputPostMouseMotionEvent(pPriv->dev, x, y);
         }
 
-        if (ev.type == EnterNotify) {
-            xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Cursor entered window!\n");
-        }
-
-        if (ev.type == LeaveNotify) {
-            xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Cursor left window!\n");
-        }
-
+        // Post mouse button press events to input driver.
         if (ev.type == ButtonPress) {
-            switch (ev.xbutton.button) {
-            case Button1: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Left Mouse Button Pressed\n");
-                NestedPostMouseButton(pPriv->dev, 1, TRUE);
-                break;
-            case Button2: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Middle Mouse Button Pressed\n");
-                break;
-            case Button3: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Right Mouse Button Pressed\n");
-                break;
-            case Button4: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Up Pressed\n");
-                break;
-            case Button5: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Down Pressed\n");
-            }
+            NestedInputPostButtonEvent(pPriv->dev, ev.xbutton.button, TRUE);
         }
-
+        
+        // Post mouse button release events to input driver.
         if (ev.type == ButtonRelease) {
-            switch (ev.xbutton.button) {
-            case Button1: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Left Mouse Button Released\n");
-                NestedPostMouseButton(pPriv->dev, 1, FALSE);
-                break;
-            case Button2: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Middle Mouse Button Released\n");
-                break;
-            case Button3: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Right Mouse Button Released\n");
-                break;
-            case Button4: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Up Released\n");
-                break;
-            case Button5: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Wheel Down Released\n");
-            }
+            NestedInputPostButtonEvent(pPriv->dev, ev.xbutton.button, FALSE);
         }
 
+        // Post keyboard press events to input driver.
         if (ev.type == KeyPress) {
-            xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Key Pressed!--%d\n",ev.xkey.keycode);
-            NestedPostKey(pPriv->dev, ev.xkey.keycode, TRUE);
+            NestedInputPostKeyboardEvent(pPriv->dev, ev.xkey.keycode, TRUE);
         }
 
+        // Post keyboard release events to input driver.
         if (ev.type == KeyRelease) {
-            xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Key Released!--%d\n",ev.xkey.keycode);
-            NestedPostKey(pPriv->dev, ev.xkey.keycode, FALSE);
+            NestedInputPostKeyboardEvent(pPriv->dev, ev.xkey.keycode, FALSE);
         }
     }
 }

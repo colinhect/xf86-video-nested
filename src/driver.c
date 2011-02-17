@@ -37,8 +37,7 @@
 #include "config.h"
 
 #include "client.h"
-
-#include "xNestedMouse.h"
+#include "input.h"
 
 #define NESTED_VERSION 0
 #define NESTED_NAME "NESTED"
@@ -120,12 +119,12 @@ _X_EXPORT DriverRec NESTED = {
     0     /* PciProbe */
 };
 
-_X_EXPORT InputDriverRec NESTEDMOUSE = {
+_X_EXPORT InputDriverRec NESTEDINPUT = {
     1,
-    "nestedmouse",
+    "nestedinput",
     NULL,
-    NestedMousePreInit,
-    NestedMouseUnInit,
+    NestedInputPreInit,
+    NestedInputUnInit,
     NULL,
     0,
 };
@@ -171,7 +170,7 @@ typedef struct NestedPrivate {
 
 static CARD32
 NestedMouseTimer(OsTimerPtr timer, CARD32 time, pointer arg) {
-    Load_Nested_Mouse(arg);
+    NestedInputLoadDriver(arg);
     return 0;
 }
 
@@ -183,7 +182,7 @@ NestedSetup(pointer module, pointer opts, int *errmaj, int *errmin) {
         setupDone = TRUE;
         
         xf86AddDriver(&NESTED, module, HaveDriverFuncs);
-        xf86AddInputDriver(&NESTEDMOUSE, module, 0);
+        xf86AddInputDriver(&NESTEDINPUT, module, 0);
         
         return (pointer)1;
     } else {
