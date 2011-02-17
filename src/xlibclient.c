@@ -299,6 +299,7 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
         if (ev.type == ButtonPress) {
             switch (ev.xbutton.button) {
             case Button1: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Left Mouse Button Pressed\n");
+                NestedPostMouseButton(pPriv->dev, 1, TRUE);
                 break;
             case Button2: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Middle Mouse Button Pressed\n");
                 break;
@@ -313,6 +314,7 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
         if (ev.type == ButtonRelease) {
             switch (ev.xbutton.button) {
             case Button1: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Left Mouse Button Released\n");
+                NestedPostMouseButton(pPriv->dev, 1, FALSE);
                 break;
             case Button2: xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Middle Mouse Button Released\n");
                 break;

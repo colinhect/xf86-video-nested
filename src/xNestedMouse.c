@@ -128,7 +128,31 @@ NestedMouseUnplug(pointer p) {
 
 static int
 _nested_mouse_init_buttons(DeviceIntPtr device) {
-    return -1;
+        
+InputInfoPtr        pInfo = device->public.devicePrivate;
+    CARD8               *map;
+    int                 i;
+    int                 ret = Success;
+    const int           num_buttons = 2;
+
+    Atom btn_labels[2] = {0};
+
+    btn_labels[0] = "left";
+    btn_labels[1] = "right";
+
+    map = xcalloc(num_buttons, sizeof(CARD8));
+
+    for (i = 0; i < num_buttons; i++)
+        map[i] = i;
+
+    if (!InitButtonClassDeviceStruct(device, num_buttons, btn_labels,  map)) {
+            xf86Msg(X_ERROR, "%s: Failed to register buttons.\n", pInfo->name);
+            ret = BadAlloc;
+    }
+
+    xfree(map);
+    return ret;
+return -1;
 }
 
 static int
@@ -231,4 +255,8 @@ void Load_Nested_Mouse(NestedClientPrivatePtr clientData) {
     
 void NestedPostMouseMotion(void* dev, int x, int y) {
     xf86PostMotionEvent(dev, TRUE, 0, 2, x, y);
+}
+
+void NestedPostMouseButton(void* dev, int button, int isDown) {
+    xf86PostButtonEvent(dev, 0, button, isDown, 0, 0);
 }
