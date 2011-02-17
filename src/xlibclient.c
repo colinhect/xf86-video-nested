@@ -347,6 +347,6 @@ NestedClientCloseScreen(NestedClientPrivatePtr pPriv) {
     XCloseDisplay(pPriv->display);
 }
 
-void NestedClientSetDevicePtr(NestedClientPrivatePtr pPriv, void* dev) {
+void NestedClientSetDevicePtr(NestedClientPrivatePtr pPriv, void *dev) {
     pPriv->dev = dev;
 }

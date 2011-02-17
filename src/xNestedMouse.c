@@ -133,6 +133,27 @@ _nested_mouse_init_buttons(DeviceIntPtr device) {
 
 static int
 _nested_mouse_init_axes(DeviceIntPtr device) {
+   InputInfoPtr        pInfo = device->public.devicePrivate;
+    int                 i;
+    const int           num_axes = 2;
+
+    if (!InitValuatorClassDeviceStruct(device,
+                num_axes,
+                GetMotionHistory,
+                GetMotionHistorySize(),
+                0))
+        return BadAlloc;
+
+    pInfo->dev->valuator->mode = Relative;
+    if (!InitAbsoluteClassDeviceStruct(device))
+            return BadAlloc;
+
+    for (i = 0; i < 2; i++) {
+            xf86InitValuatorAxisStruct(device, i, "", -1, -1, 1, 1, 1);
+            xf86InitValuatorDefaults(device, i);
+    }
+
+    return Success; 
     return -1;
 }
 
@@ -199,7 +220,10 @@ void Load_Nested_Mouse(NestedClientPrivatePtr clientData) {
         xf86Msg(X_ERROR, "Failed to load input driver.\n");
     }
 
+    NestedMouseControl(dev, DEVICE_ON); 
+
     InputInfoPtr pInfo = dev->public.devicePrivate;
+
     NestedClientSetDevicePtr(clientData, pInfo->dev);
 
     xf86Msg(X_INFO, "NESTED MOUSE LOADING DONE\n");
@@ -211,6 +235,8 @@ void NestedPostMouseMotion(void* dev, int x, int y) {
     if (dev == NULL) {
         xf86Msg(X_ERROR, "Null device.\n");
     }
+//((DeviceIntPtr)dev)->enabled = TRUE;
+   // xf86Msg(X_ERROR, "THIS: %s", ((DeviceIntPtr)dev)->name);
 
-    xf86PostMotionEvent(dev, 1, 0, 2, 1, 1);
+    xf86PostMotionEvent(dev, TRUE, 0, 2, x, y);
 }
