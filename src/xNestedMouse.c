@@ -150,6 +150,12 @@ InputInfoPtr        pInfo = device->public.devicePrivate;
             ret = BadAlloc;
     }
 
+
+    if (!InitKeyboardDeviceStruct(device, NULL, NULL, NULL)) {
+            xf86Msg(X_ERROR, "%s: Failed to register keyboard.\n", pInfo->name);
+            ret = BadAlloc;
+    } 
+
     xfree(map);
     return ret;
 return -1;
@@ -259,4 +265,8 @@ void NestedPostMouseMotion(void* dev, int x, int y) {
 
 void NestedPostMouseButton(void* dev, int button, int isDown) {
     xf86PostButtonEvent(dev, 0, button, isDown, 0, 0);
+}
+
+void NestedPostKey(void* dev, unsigned int keycode, int isDown) {
+    xf86PostKeyboardEvent(dev, keycode, isDown);
 }

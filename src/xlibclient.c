@@ -328,10 +328,12 @@ NestedClientTimerCallback(NestedClientPrivatePtr pPriv) {
 
         if (ev.type == KeyPress) {
             xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Key Pressed!--%d\n",ev.xkey.keycode);
+            NestedPostKey(pPriv->dev, ev.xkey.keycode, TRUE);
         }
 
         if (ev.type == KeyRelease) {
             xf86DrvMsg(pPriv->scrnIndex, X_INFO, "Key Released!--%d\n",ev.xkey.keycode);
+            NestedPostKey(pPriv->dev, ev.xkey.keycode, FALSE);
         }
     }
 }
