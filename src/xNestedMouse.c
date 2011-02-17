@@ -230,13 +230,5 @@ void Load_Nested_Mouse(NestedClientPrivatePtr clientData) {
 }
     
 void NestedPostMouseMotion(void* dev, int x, int y) {
-    xf86Msg(X_INFO, "Mouse move: %i %i\n", x, y);
-
-    if (dev == NULL) {
-        xf86Msg(X_ERROR, "Null device.\n");
-    }
-//((DeviceIntPtr)dev)->enabled = TRUE;
-   // xf86Msg(X_ERROR, "THIS: %s", ((DeviceIntPtr)dev)->name);
-
     xf86PostMotionEvent(dev, TRUE, 0, 2, x, y);
 }
