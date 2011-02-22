@@ -90,6 +90,7 @@ NestedClientCreateScreen(int scrnIndex,
 
     int shmMajor, shmMinor;
     Bool hasSharedPixmaps;
+    char windowTitle[32];
 
     pPriv = malloc(sizeof(struct NestedClientPrivate));
     pPriv->scrnIndex = scrnIndex;
@@ -113,13 +114,17 @@ NestedClientCreateScreen(int scrnIndex,
     sizeHints.max_height = height;
     XSetWMNormalHints(pPriv->display, pPriv->window, &sizeHints);
 
-    XStoreName(pPriv->display, pPriv->window, "Title");
+    sprintf(windowTitle, "Display #%s",
+        DisplayString(pPriv->display));
+
+    XStoreName(pPriv->display, pPriv->window, windowTitle);
     
     XMapWindow(pPriv->display, pPriv->window);
 
     XSelectInput(pPriv->display, pPriv->window, ExposureMask | 
-                 PointerMotionMask | EnterWindowMask | LeaveWindowMask | ButtonPressMask |
-         ButtonReleaseMask | KeyPressMask |KeyReleaseMask);
+         PointerMotionMask | EnterWindowMask | LeaveWindowMask |
+         ButtonPressMask | ButtonReleaseMask | KeyPressMask |
+         KeyReleaseMask);
 
     if (XShmQueryExtension(pPriv->display)) {
         if (XShmQueryVersion(pPriv->display, &shmMajor, &shmMinor,
@@ -313,6 +318,7 @@ NestedClientCloseScreen(NestedClientPrivatePtr pPriv) {
     XCloseDisplay(pPriv->display);
 }
 
-void NestedClientSetDevicePtr(NestedClientPrivatePtr pPriv, void *dev) {
+void
+NestedClientSetDevicePtr(NestedClientPrivatePtr pPriv, void *dev) {
     pPriv->dev = dev;
 }

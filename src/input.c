@@ -12,6 +12,7 @@
 #include <xorg/xf86.h>
 #include <xorg/xf86Module.h>
 #include <xorg/xf86str.h>
+#include <xorg/xf86_OSproc.h>
 
 #include "config.h"
 

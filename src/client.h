@@ -59,4 +59,3 @@ void NestedClientTimerCallback(NestedClientPrivatePtr pPriv);
 void NestedClientCloseScreen(NestedClientPrivatePtr pPriv);
 
 void NestedClientSetDevicePtr(NestedClientPrivatePtr pPriv, void* dev);
-
