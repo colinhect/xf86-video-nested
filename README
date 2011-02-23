@@ -1,4 +1,4 @@
-xf86-video-nestedv: driver to run Xorg on top of Xorg or something else
+xf86-video-nested: driver to run Xorg on top of Xorg or something else
 
 = Usage =
 
@@ -13,11 +13,12 @@ My xorg.conf:
 Section "ServerFlags"
     Option "AutoEnableDevices" "false"
     Option "AutoAddDevices" "false"
+    Option "AllowEmptyInput" "true"
 EndSection
 
 Section "Device"
     Identifier "device1"
-    Driver "nestedv"
+    Driver "nested"
     Option "Display" ":0"     # you can omit this
 EndSection
 
@@ -38,13 +39,8 @@ Section "ServerLayout"
 EndSection
 -- end xorg.conf --
 
-If you want to have an input device you need 3 things:
-- add another input device to your machine
-- configure your bottom-layer xorg.conf to _not_ use that device (you'll
-  probably have to disable input hotplug and add InputDevice sections in
-  xorg.conf)
-- configure your top-layer xorg.conf to use that device
-In the future I'll write xf86-input-nestedi so you'll be able to use it =)
+Input events from the client window are forwarded to the nested xserver, so no
+input driver is needed.
 
 You can also have more than one screen with this driver. Here's an example of a
 xorg.conf with 2 screens and a mouse:
@@ -53,21 +49,17 @@ xorg.conf with 2 screens and a mouse:
 Section "ServerFlags"
     Option "AutoEnableDevices" "false"
     Option "AutoAddDevices" "false"
+    Option "AllowEmptyInput" "true"
 EndSection
 
 Section "Device"
     Identifier "device1"
-    Driver "nestedv"
-EndSection
-Section "Device"
-    Identifier "device2"
-    Driver "nestedv"
+    Driver "nested"
 EndSection
 
-Section "InputDevice"
-    Identifier "mouse1"
-    Driver "evdev"
-    Option "device" "/dev/input/event7"
+Section "Device"
+    Identifier "device2"
+    Driver "nested"
 EndSection
 
 Section "Screen"
@@ -79,6 +71,7 @@ Section "Screen"
         Modes "640x480"
     EndSubSection
 EndSection
+
 Section "Screen"
     Identifier "screen2"
     Device "device1"
