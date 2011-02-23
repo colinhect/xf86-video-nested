@@ -18,7 +18,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * Author: Paulo Zanoni <pzanoni@mandriva.com>
+ * Authors: Paulo Zanoni <pzanoni@mandriva.com>, Timothy Fleck,
+ *          Colin Cornaby, Weseung Hwang, Colin Hill, Nathaniel Way,
+ *          Tuan Thong Bui.
  */
 
 #include <xorg/colormap.h>
@@ -52,10 +54,10 @@ void NestedClientUpdateScreen(NestedClientPrivatePtr pPriv,
                               int16_t x2,
                               int16_t y2);
 
-void NestedClientHideCursor(NestedClientPrivatePtr pPriv); /* Hide cursor function */
+void NestedClientHideCursor(NestedClientPrivatePtr pPriv);
 
 void NestedClientTimerCallback(NestedClientPrivatePtr pPriv);
 
 void NestedClientCloseScreen(NestedClientPrivatePtr pPriv);
 
-void NestedClientSetDevicePtr(NestedClientPrivatePtr pPriv, void* dev);
+void NestedClientSetDevicePtr(NestedClientPrivatePtr pPriv, DeviceIntPtr dev);

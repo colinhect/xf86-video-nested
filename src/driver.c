@@ -18,7 +18,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * Author: Paulo Zanoni <pzanoni@mandriva.com>
+ * Authors: Paulo Zanoni <pzanoni@mandriva.com>, Timothy Fleck,
+ *          Colin Cornaby, Weseung Hwang, Colin Hill, Nathaniel Way,
+ *          Tuan Thong Bui.
  */
 
 #include <stdlib.h>
@@ -167,12 +169,6 @@ typedef struct NestedPrivate {
 #define PCLIENTDATA(p) (PNESTED(p)->clientData)
 
 /*static ScrnInfoPtr NESTEDScrn;*/
-
-static CARD32
-NestedMouseTimer(OsTimerPtr timer, CARD32 time, pointer arg) {
-    NestedInputLoadDriver(arg);
-    return 0;
-}
 
 static pointer
 NestedSetup(pointer module, pointer opts, int *errmaj, int *errmin) {
@@ -581,6 +577,14 @@ NestedAddMode(ScrnInfoPtr pScrn, int width, int height) {
     return TRUE;
 }
 
+// Wrapper for timed call to NestedInputLoadDriver.  Used with timer in order
+// to force the initialization to wait until the input core is initialized.
+static CARD32
+NestedMouseTimer(OsTimerPtr timer, CARD32 time, pointer arg) {
+    NestedInputLoadDriver(arg);
+    return 0;
+}
+
 /* Called at each server generation */
 static Bool NestedScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
                              char **argv) {
@@ -656,11 +660,12 @@ static Bool NestedScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
     pNested->CloseScreen = pScreen->CloseScreen;
     pScreen->CloseScreen = NestedCloseScreen;
 
+    // Schedule the NestedInputLoadDriver function to load once the
+    // input core is initialized.
     pNested->timer = TimerSet(NULL, 0, TIMER_CALLBACK_INTERVAL,
                               NestedTimerCallback, (pointer)pScrn);
 
     return TRUE;
-
 }
 
 static Bool

@@ -18,7 +18,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * Author: Paulo Zanoni <pzanoni@mandriva.com>
+ * Authors: Paulo Zanoni <pzanoni@mandriva.com>, Timothy Fleck,
+ *          Colin Cornaby, Weseung Hwang, Colin Hill, Nathaniel Way,
+ *          Tuan Thong Bui.
  */
 
 #include <client.h>
