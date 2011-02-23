@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -21,7 +22,7 @@
 
 #define SYSCALL(call) while (((call) == -1) && (errno == EINTR))
 
-#define NUM_MOUSE_BUTTONS 5
+#define NUM_MOUSE_BUTTONS 6
 #define NUM_MOUSE_AXES 2
 
 static pointer
@@ -74,7 +75,7 @@ NestedInputPreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
     if (!(pInfo = xf86AllocateInput(drv, 0)))
         return NULL;
 
-    pNestedInput = xcalloc(1, sizeof(NestedInputDeviceRec));
+    pNestedInput = calloc(1, sizeof(NestedInputDeviceRec));
 
     if (!pNestedInput) {
         pInfo->private = NULL;
@@ -111,7 +112,7 @@ NestedInputPreInit(InputDriverPtr drv, IDevPtr dev, int flags) {
 
         pInfo->private = NULL;
 
-        xfree(pNestedInput);
+        free(pNestedInput);
         xf86DeleteInput(pInfo, 0);
 
         return NULL;
@@ -153,7 +154,7 @@ _nested_input_init_buttons(DeviceIntPtr device) {
     CARD8       *map;
     Atom         buttonLabels[NUM_MOUSE_BUTTONS] = {0};
 
-    map = xcalloc(NUM_MOUSE_BUTTONS, sizeof(CARD8));
+    map = calloc(NUM_MOUSE_BUTTONS, sizeof(CARD8));
 
     int i;
     for (i = 0; i < NUM_MOUSE_BUTTONS; i++)
@@ -162,7 +163,7 @@ _nested_input_init_buttons(DeviceIntPtr device) {
     if (!InitButtonClassDeviceStruct(device, NUM_MOUSE_BUTTONS, buttonLabels, map)) {
         xf86Msg(X_ERROR, "%s: Failed to register buttons.\n", pInfo->name);
         
-        xfree(map);
+        free(map);
         return BadAlloc;
     }
 
@@ -175,9 +176,10 @@ _nested_input_init_axes(DeviceIntPtr device) {
 
     if (!InitValuatorClassDeviceStruct(device,
                                        NUM_MOUSE_AXES,
-                                       GetMotionHistory,
+                                       (Atom*)GetMotionHistory,
+                                       //(Atom*)NULL,
                                        GetMotionHistorySize(),
-                                       0)) {
+                                       (Atom)0)) {
         return BadAlloc;
     }
 
@@ -187,7 +189,7 @@ _nested_input_init_axes(DeviceIntPtr device) {
 
     int i;
     for (i = 0; i < NUM_MOUSE_AXES; i++) {
-        xf86InitValuatorAxisStruct(device, i, "", -1, -1, 1, 1, 1);
+        xf86InitValuatorAxisStruct(device, i, (Atom)NULL, -1, -1, 1, 1, 1);
         xf86InitValuatorDefaults(device, i);
     }
 
@@ -242,12 +244,12 @@ void
 NestedInputLoadDriver(NestedClientPrivatePtr clientData) {
     
     // Create input options for our invocation to NewInputDeviceRequest.   
-    InputOption* options = (InputOption*)xalloc(sizeof(InputOption));
+    InputOption* options = (InputOption*)malloc(sizeof(InputOption));
     
     options->key = "driver";
     options->value = "nestedinput";
 
-    options->next = (InputOption*)xalloc(sizeof(InputOption));
+    options->next = (InputOption*)malloc(sizeof(InputOption));
     
     options->next->key = "identifier";
     options->next->value = "nestedinput";
