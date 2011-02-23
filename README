@@ -39,8 +39,8 @@ Section "ServerLayout"
 EndSection
 -- end xorg.conf --
 
-Input events from the client window are forwarded to the nested xserver, so no
-input driver is needed.
+Mouse and keyboard input events from the client window are forwarded to the nested 
+xserver, so no mouse/keyboard drivers are needed.
 
 You can also have more than one screen with this driver. Here's an example of a
 xorg.conf with 2 screens and a mouse:
