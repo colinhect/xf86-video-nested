@@ -18,9 +18,15 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * Authors: Paulo Zanoni <pzanoni@mandriva.com>, Timothy Fleck,
- *          Colin Cornaby, Weseung Hwang, Colin Hill, Nathaniel Way,
- *          Tuan Thong Bui.
+ * Authors:
+ *
+ * Paulo Zanoni <pzanoni@mandriva.com>
+ * Tuan Bui <tuanbui918@gmail.com>
+ * Colin Cornaby <colin.cornaby@mac.com>
+ * Timothy Fleck <tim.cs.pdx@gmail.com>
+ * Colin Hill <colin.james.hill@gmail.com>
+ * Weseung Hwang <weseung@gmail.com>
+ * Nathaniel Way <nathanielcw@hotmail.com>
  */
 
 #include <xorg/xf86.h>
