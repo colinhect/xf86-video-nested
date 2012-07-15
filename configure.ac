@@ -24,7 +24,7 @@ dnl
 AC_PREREQ([2.65])
 AC_INIT([xf86-video-nested], [0.1.0], [pzanoni@mandriva.com])
 AC_CONFIG_AUX_DIR([build-aux])
-AM_INIT_AUTOMAKE([foreign -Wall -Werror dist-bzip2])
+AM_INIT_AUTOMAKE([foreign -Wall -Werror -Wno-extra-portability dist-bzip2])
 AM_MAINTAINER_MODE
 AC_PROG_CC
 
